@@ -1,0 +1,257 @@
+.tip-page {
+     min-height: 100vh;
+     background: var(--cream)
+}
+
+.tip-top {
+     height: 72px;
+     padding: 0 5%;
+     display: flex;
+     align-items: center;
+     justify-content: space-between;
+     border-bottom: 1px solid var(--line);
+     background: #fffaf2
+}
+
+.tip-top>span {
+     font-size: 11px;
+     color: var(--muted)
+}
+
+.tip-layout {
+     max-width: 1050px;
+     margin: auto;
+     display: grid;
+     grid-template-columns: 1fr 1.05fr;
+     gap: 100px;
+     padding: 80px 30px
+}
+
+.tip-intro {
+     padding-top: 30px
+}
+
+.creator-big {
+     width: 60px;
+     height: 60px;
+     background: var(--ink);
+     color: var(--champ);
+     font-size: 20px;
+     margin-bottom: 35px
+}
+
+.tip-intro h1 {
+     font-size: 65px
+}
+
+.tip-intro p {
+     max-width: 400px;
+     color: var(--muted);
+     line-height: 1.6;
+     font-size: 14px
+}
+
+.tip-social {
+     display: flex;
+     gap: 18px;
+     margin-top: 25px;
+     color: #728079;
+     font-size: 10px
+}
+
+.tip-social span {
+     display: flex;
+     gap: 5px;
+     align-items: center
+}
+
+.tip-card {
+     background: #fff;
+     border: 1px solid var(--line);
+     border-radius: 20px;
+     padding: 28px;
+     box-shadow: var(--shadow)
+}
+
+.tip-card-head {
+     display: flex;
+     justify-content: space-between;
+     margin-bottom: 25px
+}
+
+.tip-card-head h2 {
+     font-size: 21px;
+     margin: 0 0 4px
+}
+
+.tip-card-head p {
+     font-size: 11px;
+     color: var(--muted);
+     margin: 0
+}
+
+.tip-card-head>svg {
+     color: #b0834c
+}
+
+.tip-card label {
+     font-size: 10px;
+     font-weight: 800;
+     display: block;
+     margin: 17px 0 8px
+}
+
+.tip-card label span {
+     font-weight: 400;
+     color: #9ba59f
+}
+
+.amounts {
+     display: grid;
+     grid-template-columns: repeat(5, 1fr);
+     gap: 6px
+}
+
+.amounts button,
+.voice-grid button,
+.sound-row button {
+     border: 1px solid var(--line);
+     background: #fff;
+     border-radius: 8px;
+     padding: 10px 5px;
+     font-size: 10px;
+     color: #53625b
+}
+
+.amounts button.selected,
+.voice-grid button.selected {
+     border-color: var(--ink);
+     background: #edf4f0;
+     color: var(--ink);
+     font-weight: 800
+}
+
+.custom-amount {
+     display: flex;
+     align-items: center;
+     border: 1px solid var(--line);
+     border-radius: 8px;
+     padding: 0 11px;
+     margin-top: 8px
+}
+
+.custom-amount span {
+     font-weight: 700;
+     color: var(--ink)
+}
+
+.custom-amount input {
+     border: 0;
+     outline: 0;
+     width: 100%;
+     padding: 11px 7px
+}
+
+.tip-input {
+     width: 100%;
+     border: 1px solid var(--line);
+     border-radius: 8px;
+     padding: 11px;
+     outline: 0
+}
+
+.tip-input:focus {
+     border-color: var(--ink)
+}
+
+textarea {
+     resize: vertical
+}
+
+.voice-grid {
+     display: grid;
+     grid-template-columns: repeat(4, 1fr);
+     gap: 6px
+}
+
+.voice-grid button {
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     gap: 5px
+}
+
+.sound-row {
+     display: flex;
+     gap: 6px
+}
+
+.sound-row button {
+     display: flex;
+     gap: 5px;
+     align-items: center
+}
+
+.tip-submit {
+     width: 100%;
+     margin-top: 24px;
+     padding: 14px
+}
+
+.secure-note {
+     display: flex;
+     justify-content: center;
+     align-items: center;
+     gap: 4px;
+     color: #9aa49f;
+     font-size: 9px;
+     margin-top: 11px
+}
+
+@media(max-width:1000px) {
+     .tip-layout {
+          gap: 50px
+     }
+}
+
+@media(max-width:720px) {
+     .tip-layout {
+          grid-template-columns: 1fr;
+          gap: 35px;
+          padding: 45px 18px
+     }
+
+     .tip-intro {
+          padding-top: 0
+     }
+
+     .tip-intro h1 {
+          font-size: 51px
+     }
+
+     .tip-card {
+          padding: 20px
+     }
+
+     .tip-top {
+          padding: 0 18px
+     }
+
+     .tip-top>span {
+          font-size: 9px
+     }
+}
+
+@media(max-width:430px) {
+     .amounts {
+          grid-template-columns: repeat(3, 1fr)
+     }
+
+     .voice-grid {
+          grid-template-columns: repeat(2, 1fr)
+     }
+
+     .sound-row {
+          flex-wrap: wrap
+     }
+}

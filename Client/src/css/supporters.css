@@ -1,0 +1,72 @@
+.podium {
+     display: grid;
+     grid-template-columns: repeat(3, 1fr);
+     gap: 13px;
+     margin-bottom: 13px
+}
+
+.podium-card {
+     text-align: center;
+     background: #fff;
+     border: 1px solid var(--line);
+     border-radius: 15px;
+     padding: 28px
+}
+
+.podium-avatar {
+     width: 48px;
+     height: 48px;
+     border-radius: 50%;
+     display: grid;
+     place-items: center;
+     margin: 0 auto 12px;
+     background: var(--champ);
+     color: var(--ink);
+     font-weight: 800
+}
+
+.podium-rank {
+     font-size: 10px;
+     color: #9b7342
+}
+
+.podium-card h3 {
+     margin: 7px 0;
+     font-size: 16px
+}
+
+.podium-card strong,
+.podium-card small {
+     display: block
+}
+
+.podium-card strong {
+     font-size: 18px;
+     color: var(--ink)
+}
+
+.podium-card small {
+     font-size: 9px;
+     color: var(--muted);
+     margin-top: 4px
+}
+
+.p-1 {
+     box-shadow: inset 0 3px 0 var(--champ)
+}
+
+.table-row {
+     padding: 15px 3px
+}
+
+.table-row>span:nth-last-child(2) {
+     font-size: 10px;
+     color: var(--muted);
+     margin-left: auto
+}
+
+@media(max-width:720px) {
+     .podium {
+          grid-template-columns: 1fr
+     }
+}

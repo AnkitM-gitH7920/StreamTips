@@ -1,0 +1,47 @@
+.btn {
+     border: 0;
+     border-radius: 12px;
+     padding: 13px 19px;
+     display: inline-flex;
+     align-items: center;
+     justify-content: center;
+     gap: 9px;
+     font-weight: 700;
+     font-size: 14px;
+     transition: .2s
+}
+
+.btn-primary {
+     background: var(--ink);
+     color: #fff
+}
+
+.btn-primary:hover {
+     transform: translateY(-2px);
+     box-shadow: 0 10px 24px rgba(6, 78, 59, .2)
+}
+
+.btn-light {
+     background: var(--champ);
+     color: var(--ink)
+}
+
+.btn-ghost {
+     background: transparent;
+     color: var(--ink);
+     border: 1px solid var(--line)
+}
+
+.btn-outline {
+     background: transparent;
+     color: var(--ink);
+     border: 1px solid #ccd7d0
+}
+
+.btn.small {
+     padding: 10px 15px
+}
+
+.full {
+     width: 100%
+}

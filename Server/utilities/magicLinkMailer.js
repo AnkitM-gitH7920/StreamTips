@@ -1,0 +1,278 @@
+import nodemailer from "nodemailer";
+
+const magicLinkTransporter = nodemailer.createTransport({
+     host: "smtp.gmail.com",
+     port: 465,
+     secure: true,
+     auth: {
+          user: process.env.NODEMAILER_EMAIL,
+          pass: process.env.NODEMAILER_PASS
+     }
+})
+
+async function magicLinkMailer(receiverEmail, subject, magicLinkToken) {
+     let mail_link_mail_body = `
+<!DOCTYPE html>
+<html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+
+<head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <meta name="x-apple-disable-message-reformatting">
+     <title>StreamTips - Magic Link Login</title>
+     <!--[if mso]>
+    <noscript>
+    <xml>
+    <o:OfficeDocumentSettings>
+      <o:PixelsPerInch>96</o:PixelsPerInch>
+    </o:OfficeDocumentSettings>
+    </xml>
+    </noscript>
+    <![endif]-->
+     <style type="text/css">
+          @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+          /* Client Resets */
+          body,
+          table,
+          td,
+          a {
+               -webkit-text-size-adjust: 100%;
+               -ms-text-size-adjust: 100%;
+          }
+
+          table,
+          td {
+               mso-table-lspace: 0pt;
+               mso-table-rspace: 0pt;
+          }
+
+          img {
+               -ms-interpolation-mode: bicubic;
+               border: 0;
+               height: auto;
+               line-height: 100%;
+               outline: none;
+               text-decoration: none;
+          }
+
+          table {
+               border-collapse: collapse !important;
+          }
+
+          body {
+               height: 100% !important;
+               margin: 0 !important;
+               padding: 0 !important;
+               width: 100% !important;
+               background-color: #06090e;
+               font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          }
+
+          /* Custom Interactive & Visual Styling */
+          a[x-apple-data-detectors] {
+               color: inherit !important;
+               text-decoration: none !important;
+               font-size: inherit !important;
+               font-family: inherit !important;
+               font-weight: inherit !important;
+               line-height: inherit !important;
+          }
+
+          .cta-button {
+               transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+          }
+
+          .cta-button:hover {
+               background-color: #00ff87 !important;
+               box-shadow: 0px 0px 25px rgba(0, 255, 135, 0.55), 0px 4px 12px rgba(0, 0, 0, 0.4) !important;
+               transform: translateY(-2px) !important;
+          }
+
+          .link-box:hover {
+               border-color: rgba(16, 185, 129, 0.4) !important;
+          }
+
+          @media screen and (max-width: 600px) {
+               .email-container {
+                    width: 100% !important;
+                    padding: 12px !important;
+               }
+
+               .card-body {
+                    padding: 32px 20px !important;
+               }
+
+               .heading-text {
+                    font-size: 24px !important;
+               }
+
+               .cta-button {
+                    width: 100% !important;
+                    display: block !important;
+               }
+          }
+     </style>
+</head>
+
+<body style="margin: 0; padding: 0; background-color: #06090e; -webkit-font-smoothing: antialiased;">
+
+     <!-- Background Canvas Container -->
+     <table border="0" cellpadding="0" cellspacing="0" width="100%"
+          style="background-color: #06090e; background-image: radial-gradient(circle at 50% 0%, #0d281e 0%, #06090e 70%);">
+          <tr>
+               <td align="center" style="padding: 40px 16px;">
+
+                    <table border="0" cellpadding="0" cellspacing="0" width="100%" class="email-container"
+                         style="max-width: 520px; background-color: #0b1219; border: 1px solid rgba(16, 185, 129, 0.18); border-radius: 24px; overflow: hidden; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 40px rgba(16, 185, 129, 0.05);">
+
+                         <!-- Top Neon Ambient Line -->
+                         <tr>
+                              <td height="3"
+                                   style="background: linear-gradient(90deg, #10b981 0%, #00ff87 50%, #059669 100%); font-size: 0; line-height: 0;">
+                                   &nbsp;</td>
+                         </tr>
+
+                         <tr>
+                              <td align="center" style="padding: 40px 32px 10px 32px;">
+                                   <table border="0" cellpadding="0" cellspacing="0">
+                                        <tr>
+                                             <td align="center"
+                                                  style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 100px; padding: 10px 22px;">
+                                                  <table border="0" cellpadding="0" cellspacing="0">
+                                                       <tr>
+                                                            <td style="vertical-align: middle; padding-right: 8px;">
+                                                                 <!-- Neon Lightning Icon -->
+                                                                 <svg width="20" height="20" viewBox="0 0 24 24"
+                                                                      fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                      <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z"
+                                                                           fill="#00FF87" stroke="#10B981"
+                                                                           stroke-width="1.5" stroke-linejoin="round" />
+                                                                 </svg>
+                                                            </td>
+                                                            <td
+                                                                 style="vertical-align: middle; font-size: 20px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px;">
+                                                                 Stream<span style="color: #00ff87;">Tips</span>
+                                                            </td>
+                                                       </tr>
+                                                  </table>
+                                             </td>
+                                        </tr>
+                                   </table>
+                              </td>
+                         </tr>
+
+                         <tr>
+                              <td class="card-body" style="padding: 32px 40px 40px 40px; text-align: center;">
+
+                                   <!-- Timer Badge -->
+                                   <table border="0" cellpadding="0" cellspacing="0" align="center"
+                                        style="margin-bottom: 24px;">
+                                        <tr>
+                                             <td
+                                                  style="background-color: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 100px; padding: 6px 14px; font-size: 12px; font-weight: 600; color: #f87171;">
+                                                  <span
+                                                       style="display: inline-block; width: 6px; height: 6px; background-color: #ef4444; border-radius: 50%; margin-right: 6px; vertical-align: middle;"></span>
+                                                  Link expires in <strong style="color: #fca5a5;">10 minutes</strong>
+                                             </td>
+                                        </tr>
+                                   </table>
+
+                                   <!-- Main Heading -->
+                                   <h1 class="heading-text"
+                                        style="margin: 0 0 12px 0; color: #ffffff; font-size: 26px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.25;">
+                                        Authentication Request
+                                   </h1>
+
+                                   <!-- Subtitle -->
+                                   <p
+                                        style="margin: 0 0 32px 0; color: #94a3b8; font-size: 15px; line-height: 1.6; font-weight: 400;">
+                                        Ready to jump back in? Tap the magic link button below to log in seamlessly to
+                                        your <strong style="color: #e2e8f0; font-weight: 600;">StreamTips</strong>
+                                        creator dashboard.
+                                   </p>
+
+                                   <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                        <tr>
+                                             <td align="center" style="padding: 0 0 36px 0;">
+                                                  <!-- Magic Link CTA Pill Button -->
+                                                    <a href="${process.env.SERVER_URI}/auth/magic-link/verify?token=${magicLinkToken}" target="_blank" class="cta-button" style="background: linear-gradient(135deg, #10b981 0%, #00ff87 100%); color: #042014; display: inline-block; font-size: 16px; font-weight: 800; letter-spacing: 0.2px; text-align: center; text-decoration: none; padding: 16px 42px; border-radius: 100px; box-shadow: 0px 8px 20px rgba(0, 255, 135, 0.35); text-transform: uppercase;"> Click to Login &nbsp;&rarr; </a>
+                                             </td>
+                                        </tr>
+                                   </table>
+
+                                   <table border="0" cellpadding="0" cellspacing="0" width="100%"
+                                        style="background-color: #080e14; border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 14px; margin-bottom: 28px;">
+                                        <tr>
+                                             <td style="padding: 16px 20px; text-align: left;">
+                                                  <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                                       <tr>
+                                                            <td width="28"
+                                                                 style="vertical-align: top; padding-top: 2px;">
+                                                                 <svg width="18" height="18" viewBox="0 0 24 24"
+                                                                      fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                      <path d="M12 22C12 22 20 18 20 12V5L12 2L4 5V12C4 18 12 22 12 22Z"
+                                                                           fill="rgba(16, 185, 129, 0.15)"
+                                                                           stroke="#10b981" stroke-width="1.5"
+                                                                           stroke-linecap="round"
+                                                                           stroke-linejoin="round" />
+                                                                      <path d="M9 12L11 14L15 10" stroke="#00ff87"
+                                                                           stroke-width="1.5" stroke-linecap="round"
+                                                                           stroke-linejoin="round" />
+                                                                 </svg>
+                                                            </td>
+                                                            <td
+                                                                 style="font-size: 13px; color: #64748b; line-height: 1.5; padding-left: 8px;">
+                                                                 <strong
+                                                                      style="color: #cbd5e1; font-weight: 600;">Security
+                                                                      Check:</strong> If you didn't request this login
+                                                                 link, no action is needed. You can safely ignore this
+                                                                 email.
+                                                            </td>
+                                                       </tr>
+                                                  </table>
+                                             </td>
+                                        </tr>
+                                   </table>
+                              </td>
+                         </tr>
+
+                         <tr>
+                              <td
+                                   style="padding: 24px 32px; background-color: #070c11; border-top: 1px solid rgba(255, 255, 255, 0.05); text-align: center;">
+                                   <p style="margin: 0 0 10px 0; color: #475569; font-size: 12px; font-weight: 500;">
+                                        Powered by <strong style="color: #94a3b8;">StreamTips Authentication
+                                             Engine</strong>
+                                   </p>
+                                   <p style="margin: 0; color: #334155; font-size: 11px;">
+                                        &copy; 2026 StreamTips, Inc. All rights reserved. &bull; <a href="#"
+                                             style="color: #475569; text-decoration: underline;">Privacy Policy</a>
+                                        &bull; <a href="#" style="color: #475569; text-decoration: underline;">Help
+                                             Center</a>
+                                   </p>
+                              </td>
+                         </tr>
+
+                    </table>
+                    <!-- End Main Card Container -->
+
+               </td>
+          </tr>
+     </table>
+
+</body>
+
+</html>
+`
+     const mailerResponse = await magicLinkTransporter.sendMail({
+          from: process.env.NODEMAILER_EMAIL,
+          to: receiverEmail,
+          subject: subject,
+          html: mail_link_mail_body
+     });
+
+     return mailerResponse;
+
+}
+
+export { magicLinkMailer }
