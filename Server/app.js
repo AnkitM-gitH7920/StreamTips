@@ -11,7 +11,8 @@ app.use(express.static("public"));
 app.use(express.static(path.join(path.dirname(fileURLToPath(import.meta.url)), "public")));
 app.use(cors({
      origin: process.env.DEPLOYED_FRONTEND_URL,
-     withCredentials: true
+     credentials: true,
+     Credential: true
 }));
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));

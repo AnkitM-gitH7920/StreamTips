@@ -10,6 +10,11 @@
      font-size: 14px;
      transition: .2s
 }
+.btn.btn-disabled{
+     opacity: 0.5;
+     cursor: not-allowed;
+     user-select: none;
+}
 
 .btn-primary {
      background: var(--ink);

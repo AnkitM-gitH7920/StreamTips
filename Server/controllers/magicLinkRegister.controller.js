@@ -81,7 +81,7 @@ const magicLinkMailSendController = asyncHandler(async (req, res, next) => {
           throw new APIError(500, "Something went wrong, please try again later", { error: "SERVER_ERROR" })
      }
 
-     return res.status(200).json(new APIResponse(200, "Mail sent to user", { email: email, genAt: creationTimestamp, expAt: expiresAt }));
+     return res.status(200).json(new APIResponse(200, `Please check you inbox ${email}`, { email: email, genAt: creationTimestamp, expAt: expiresAt }));
 })
 
 const magicLinkMailVerifyController = asyncHandler(async (req, res, next) => {

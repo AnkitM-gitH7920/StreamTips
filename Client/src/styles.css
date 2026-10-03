@@ -11,7 +11,8 @@
      --line: #dfe5df;
      --white: #fff;
      --gold: #c99a58;
-     --shadow: 0 20px 60px rgba(6, 78, 59, .12)
+     --shadow: 0 20px 60px rgba(6, 78, 59, .12);
+     --transition-duration: 0.3s;
 }
 
 * {

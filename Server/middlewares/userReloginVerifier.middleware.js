@@ -176,7 +176,7 @@ const verifyMagicLinkUser = asyncHandler(async (req, res, next) => {
                await jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET);
                const storedUser = await RegisteredUsers.findOne({ refreshToken }).select("email fullName loggedInOn contactNumber loginType").select("-_id").lean();
                if (!storedUser) {
-                    console.log(chalk.red(`Got both tokens, but user cant be found in db with EMAIL :- ${decodedOAuthAccessToken.email}`));
+                    console.log(chalk.red(`Got both tokens, but user cant be found in db with EMAIL :- ${decodedAccessToken.email}`));
                     return res
                          .status(401)
                          .clearCookie("accessToken")
