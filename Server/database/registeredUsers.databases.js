@@ -8,7 +8,7 @@ const registeredUsersSchema = new mongoose.Schema({
           trim: true,
           lowercase: true
      },
-     contactNumber: {
+     phoneNumber: {
           type: String,
           required: false,
           unique: true,

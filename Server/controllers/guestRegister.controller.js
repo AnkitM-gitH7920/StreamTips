@@ -11,9 +11,9 @@ const guestRegisterController = asyncHandler(async (req, res, next) => {
      const createdOn = Date.now(); //provides the timestamps
      const generatedUniqueGuestID = "guest_" + crypto.randomUUID();
 
-     const guestAccessToken = await generateAccessToken("guest", { guestID: generatedUniqueGuestID, loginType: "guest" }, "15d"); //Access token
-     const guestRefreshToken = await generateRefreshToken("guest", { guestID: generatedUniqueGuestID, loginType: "guest" }, "30d"); //Refresh token
-     if (!guestAccessToken || !guestRefreshToken) {
+     const accessToken = await generateAccessToken({guestID: generatedUniqueGuestID, loginType: "guest", loggedInOn: createdOn }, "15d"); //Access token
+     const refreshToken = await generateRefreshToken({guestID: generatedUniqueGuestID, loginType: "guest", loggedInOn: createdOn }, "30d"); //Refresh token
+     if (!accessToken || !refreshToken) {
           console.log(chalk.bgRed("Guest token generation error while registering guest user"));
           throw new APIError(500, "Something went wrong, please try again later", { error: "TOKEN_GENERATION_ERROR" });
      }
@@ -22,7 +22,7 @@ const guestRegisterController = asyncHandler(async (req, res, next) => {
           const createdUser = await GuestUser.create({
                guestID: generatedUniqueGuestID,
                createdOn: createdOn,
-               refreshToken: guestRefreshToken
+               refreshToken: refreshToken
           })
           if (!createdUser) {
                console.log(chalk.bgRed("DATABASE_ERROR: Cannot create guest user database document"))
@@ -38,12 +38,13 @@ const guestRegisterController = asyncHandler(async (req, res, next) => {
      console.log(chalk.green("Successfully created guest user"))
      return res
           .status(200)
-          .cookie("guestAccessToken", guestAccessToken, issueCookieOptions("access"))
-          .cookie("guestRefreshToken", guestRefreshToken, issueCookieOptions("refresh"))
-          .json(new APIResponse(200, "Response", {
-               message: "Guest account created successfully",
+          .cookie("user_session_A", accessToken, issueCookieOptions("access"))
+          .cookie("user_session_R", refreshToken, issueCookieOptions("refresh"))
+          .json(new APIResponse(200, "Guest account created successfully", {
                guestID: generatedUniqueGuestID,
-               guestAccessToken: guestAccessToken
+               user_session_A: accessToken,
+               loginType: "guest",
+               accountCreatedAt: createdOn
           }))
 })
 export { guestRegisterController }

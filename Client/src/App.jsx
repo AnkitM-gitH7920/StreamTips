@@ -13,7 +13,7 @@ export default function App() {
      return <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<AuthLayout />} />
-          <Route path="/signup" element={<AuthLayout signup />} />
+          {/* <Route path="/signup" element={<AuthLayout signup />} />*/}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/templates" element={<TemplatesPage />} />
           <Route path="/tip/:username" element={<TipPage />} />

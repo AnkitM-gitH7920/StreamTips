@@ -8,6 +8,7 @@ import { issueCookieOptions } from "../utilities/cookiesOptions.js";
 import chalk from "chalk";
 import jwt from "jsonwebtoken";
 
+const allowedLoginTypes = ["google", "magicLink", "guest"];
 // Async helper functions
 async function verifyGuestRefreshToken(data, refreshToken) {
      const { guestID } = data;
@@ -15,7 +16,7 @@ async function verifyGuestRefreshToken(data, refreshToken) {
           const decodedRefreshToken = await jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
           const storedUser = await GuestUser.findOne({ guestID });
           if (!storedUser) {
-               console.log(chalk.red("User not found in db using decoded access token data"))
+               console.log(chalk.red("User not found in db using decoded access token data"));
                return "USER_NOT_FOUND";
           }
           console.log(storedUser);
@@ -23,7 +24,6 @@ async function verifyGuestRefreshToken(data, refreshToken) {
           if (refreshToken !== storedUser.refreshToken) {
                console.log(chalk.red("Refresh token doesnt match"));
                return "TOKEN_MISMATCH";
-
           } else {
                const newGuestAccessToken = await generateAccessToken("guest", { guestID, loginType: "guest" }, "15d");
                const newGuestRefreshToken = await generateRefreshToken("guest", { guestID, loginType: "guest" }, "30d");
@@ -38,24 +38,23 @@ async function verifyGuestRefreshToken(data, refreshToken) {
                return {
                     refreshTokenUpdated: true,
                     newAccessToken: newGuestAccessToken,
-                    newRefreshToken: newGuestRefreshToken
-               }
+                    newRefreshToken: newGuestRefreshToken,
+               };
           }
-
      } catch (error) {
-          console.log(chalk.red("Error in verifier function :-"))
-          console.log(error)
+          console.log(chalk.red("Error in verifier function :-"));
+          console.log(error);
           if (error.name === "TokenExpiredError") {
                console.log("Guest Refresh token expired");
                const deletedUser = await GuestUser.findOneAndDelete({ guestID }).select("guestID createdOn fullName");
                if (!deletedUser) {
-                    console.log(chalk.red(`User session expired, CANNOT DELETE USER with USERID :- ${userID}`))
+                    console.log(chalk.red(`User session expired, CANNOT DELETE USER with USERID :- ${userID}`));
                     return "SERVER_ERROR";
                } else {
                     return {
                          userDeleted: true,
-                         deletedUserInfo: deletedUser
-                    }
+                         deletedUserInfo: deletedUser,
+                    };
                }
           } else {
                console.log(chalk.red("Something went wrong in verifyGuestRefreshToken()"));
@@ -83,17 +82,19 @@ async function verifyRegisteredUserRefreshToken(data) {
           return {
                refreshTokenUpdated: true,
                newAccessToken,
-               newRefreshToken
-          }
-
+               newRefreshToken,
+          };
      } catch (error) {
-          console.log(chalk.red("Error in OAuth verifier function :-"))
-          console.log(error)
+          console.log(chalk.red("Error in OAuth verifier function :-"));
+          console.log(error);
           if (error.name === "TokenExpiredError") {
-               const expiredUser = await RegisteredUsers.findOneAndUpdate({ refreshToken }, { isLoggedOut: true, refreshToken: null }, { returnDocument: "after" });
+               const expiredUser = await RegisteredUsers.findOneAndUpdate(
+                    { refreshToken },
+                    { isLoggedOut: true, refreshToken: null },
+                    { returnDocument: "after" },
+               );
                if (!expiredUser) return "SERVER_ERROR";
-               return { isSessionExpired: true }
-
+               return { isSessionExpired: true };
           } else {
                console.log(chalk.red("Something went wrong in verifyRegisteredUserRefreshToken()"));
                return "SERVER_ERROR";
@@ -112,25 +113,37 @@ const verifyMagicLinkUser = asyncHandler(async (req, res, next) => {
 
      if (refreshToken && !accessToken) {
           let decodedToken;
-          try { decodedToken = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET) }
-          catch (jwtError) {
+          try {
+               decodedToken = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+          } catch (jwtError) {
                console.log(jwtError);
                if (jwtError.name === "TokenExpiredError") {
                     const decodedToken = jwt.decode(refreshToken);
-                    if (!decodedToken) throw new APIError(500, "Something went wrong, try again later", { error: "SERVER_ERROR" });
+                    if (!decodedToken)
+                         throw new APIError(500, "Something went wrong, try again later", { error: "SERVER_ERROR" });
 
-                    const updatedUser = await RegisteredUsers.findOneAndUpdate({ refreshToken }, { isLoggedOut: true, refreshToken: null }, { returnDocument: "after" });
-                    if (!updatedUser) throw new APIError(500, "Something went wrong, try again later", { error: "SERVER_ERROR" });
+                    const updatedUser = await RegisteredUsers.findOneAndUpdate(
+                         { refreshToken },
+                         { isLoggedOut: true, refreshToken: null },
+                         { returnDocument: "after" },
+                    );
+                    if (!updatedUser)
+                         throw new APIError(500, "Something went wrong, try again later", { error: "SERVER_ERROR" });
 
                     return res
                          .status(200)
                          .clearCookie("accessToken")
                          .clearCookie("refreshToken")
-                         .json(new APIResponse(200, "Session has been expired, please relogin", { error: "SESSION_EXPIRED" }))
-
+                         .json(
+                              new APIResponse(200, "Session has been expired, please relogin", {
+                                   error: "SESSION_EXPIRED",
+                              }),
+                         );
                }
-               if (jwtError.name === "NotBeforeError") throw new APIError(401, "Cannot continue at the moment", { error: "UNAUTHORISED" })
-               if (jwtError.name === "JsonWebTokenError") throw new APIError(401, "Cannot continue at the moment", { error: "UNAUTHORISED" })
+               if (jwtError.name === "NotBeforeError")
+                    throw new APIError(401, "Cannot continue at the moment", { error: "UNAUTHORISED" });
+               if (jwtError.name === "JsonWebTokenError")
+                    throw new APIError(401, "Cannot continue at the moment", { error: "UNAUTHORISED" });
                throw new APIError(500, "Something went wrong, try again later", { error: "SERVER_ERROR" });
           }
 
@@ -138,25 +151,32 @@ const verifyMagicLinkUser = asyncHandler(async (req, res, next) => {
           try {
                storedUser = await RegisteredUsers.findOne({ refreshToken });
                if (!storedUser) {
-                    return res
-                         .status(401)
-                         .json({
-                              statusCode: 401,
-                              message: "Cannot continue at the moment",
-                              data: {
-                                   error: "UNAUTHORISED"
-                              },
-                              success: false
-                         })
+                    return res.status(401).json({
+                         statusCode: 401,
+                         message: "Cannot continue at the moment",
+                         data: {
+                              error: "UNAUTHORISED",
+                         },
+                         success: false,
+                    });
                }
           } catch (dbError) {
                console.log(dbError);
-               throw new APIError(500, "Something went wrong, please try again later", { error: "SERVER_ERROR" })
+               throw new APIError(500, "Something went wrong, please try again later", { error: "SERVER_ERROR" });
           }
 
-          const newAccessToken = await generateAccessToken("registered", { email: storedUser.email, loginType: storedUser.loginType, fullName: storedUser.fullName }, "15d");
-          const newRefreshToken = await generateRefreshToken("registered", { email: storedUser.email, loginType: storedUser.loginType, fullName: storedUser.fullName }, "30d");
-          if (!newAccessToken || !newRefreshToken) throw new APIError(500, "Something went wrong, try again later", { error: "SERVER_ERROR" });
+          const newAccessToken = await generateAccessToken(
+               "registered",
+               { email: storedUser.email, loginType: storedUser.loginType, fullName: storedUser.fullName },
+               "15d",
+          );
+          const newRefreshToken = await generateRefreshToken(
+               "registered",
+               { email: storedUser.email, loginType: storedUser.loginType, fullName: storedUser.fullName },
+               "30d",
+          );
+          if (!newAccessToken || !newRefreshToken)
+               throw new APIError(500, "Something went wrong, try again later", { error: "SERVER_ERROR" });
 
           storedUser.refreshToken = newRefreshToken;
           await storedUser.save();
@@ -166,7 +186,6 @@ const verifyMagicLinkUser = asyncHandler(async (req, res, next) => {
                .cookie("accessToken", newAccessToken, issueCookieOptions("access"))
                .cookie("refreshToken", newRefreshToken, issueCookieOptions("refresh"))
                .json(new APIResponse(200, "User verified successfully", null)); //data :- find user data and return from here
-
      }
 
      // When both access token and refresh tokens are present
@@ -174,9 +193,16 @@ const verifyMagicLinkUser = asyncHandler(async (req, res, next) => {
           const decodedAccessToken = jwt.decode(accessToken);
           try {
                await jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET);
-               const storedUser = await RegisteredUsers.findOne({ refreshToken }).select("email fullName loggedInOn contactNumber loginType").select("-_id").lean();
+               const storedUser = await RegisteredUsers.findOne({ refreshToken })
+                    .select("email fullName loggedInOn contactNumber loginType")
+                    .select("-_id")
+                    .lean();
                if (!storedUser) {
-                    console.log(chalk.red(`Got both tokens, but user cant be found in db with EMAIL :- ${decodedAccessToken.email}`));
+                    console.log(
+                         chalk.red(
+                              `Got both tokens, but user cant be found in db with EMAIL :- ${decodedAccessToken.email}`,
+                         ),
+                    );
                     return res
                          .status(401)
                          .clearCookie("accessToken")
@@ -185,51 +211,53 @@ const verifyMagicLinkUser = asyncHandler(async (req, res, next) => {
                               statusCode: 401,
                               message: "Cannot continue at the moment",
                               success: false,
-                              data: { error: "SERVER_ERROR" }
-                         })
+                              data: { error: "SERVER_ERROR" },
+                         });
                }
 
-               return res
-                    .status(200)
-                    .json(new APIResponse(200, "User verified successfully", {
+               return res.status(200).json(
+                    new APIResponse(200, "User verified successfully", {
                          email: storedUser.email,
                          fullName: storedUser.fullName,
                          contactNumber: storedUser.contactNumber,
                          loginType: storedUser.loginType,
-                         accessToken: accessToken
-                    }));
-
+                         accessToken: accessToken,
+                    }),
+               );
           } catch (error) {
                console.log(error);
                if (error.name === "TokenExpiredError") {
-                    console.log(chalk.red(`accessToken expired for user :- ${decodedAccessToken?.email}`))
+                    console.log(chalk.red(`accessToken expired for user :- ${decodedAccessToken?.email}`));
                     const tokenVerifyResult = await verifyRegisteredUserRefreshToken({
                          email: decodedAccessToken.email,
                          fullName: decodedAccessToken.fullName,
                          loginType: decodedAccessToken.loginType,
-                         refreshToken
+                         refreshToken,
                     });
                     if (
                          tokenVerifyResult === "USER_NOT_FOUND" ||
                          tokenVerifyResult === "TOKEN_MISMATCH" ||
                          tokenVerifyResult === "SERVER_ERROR"
-                    ) { throw new APIError(500, "Something went wrong, please try again later", { error: "SERVER_ERROR" }) }
-                    else if (tokenVerifyResult.refreshTokenUpdated) {
+                    ) {
+                         throw new APIError(500, "Something went wrong, please try again later", {
+                              error: "SERVER_ERROR",
+                         });
+                    } else if (tokenVerifyResult.refreshTokenUpdated) {
                          return res
                               .status(200)
                               .cookie("accessToken", tokenVerifyResult.newAccessToken, issueCookieOptions("access"))
                               .cookie("refreshToken", tokenVerifyResult.newRefreshToken, issueCookieOptions("refresh"))
-                              .json(new APIResponse(200, "Successfully generated new OAuth session", {
-                                   accessToken: tokenVerifyResult.newAccessToken
-                              }))
-                    }
-                    else if (tokenVerifyResult.isSessionExpired) {
+                              .json(
+                                   new APIResponse(200, "Successfully generated new OAuth session", {
+                                        accessToken: tokenVerifyResult.newAccessToken,
+                                   }),
+                              );
+                    } else if (tokenVerifyResult.isSessionExpired) {
                          return res
                               .status(401)
                               .clearCookie("accessToken")
                               .clearCookie("refreshToken")
                               .json(new APIResponse(401, "User session has been expired, please relogin", undefined));
-
                     }
                } else if (error.name === "NotBeforeError" || error.name === "JsonWebTokenError") {
                     console.log(chalk.red(`Malformed token provided by :- ${decodedAccessToken.email}`));
@@ -241,15 +269,14 @@ const verifyMagicLinkUser = asyncHandler(async (req, res, next) => {
                               statusCode: 401,
                               message: "Cannot continue at the moment",
                               success: false,
-                              data: { error: "TOKEN_MALFORMED" }
-                         })
-
-               } else { throw new APIError(500, "Something went wrong, please try again later", { error: "SERVER_ERROR" }) }
+                              data: { error: "TOKEN_MALFORMED" },
+                         });
+               } else {
+                    throw new APIError(500, "Something went wrong, please try again later", { error: "SERVER_ERROR" });
+               }
           }
      }
-
-
-})
+});
 
 const verifyOAuthUser = asyncHandler(async (req, res, next) => {
      const OAuthAccessToken = req.cookies.OAuthAccessToken;
@@ -262,7 +289,11 @@ const verifyOAuthUser = asyncHandler(async (req, res, next) => {
      if (!OAuthAccessToken && OAuthRefreshToken) {
           const decodedUserInfo = jwt.decode(OAuthRefreshToken);
           if (!decodedUserInfo || decodedUserInfo.loginType !== "google" || !decodedUserInfo.email) {
-               console.log(chalk.red(`Edited token provided by USERID :- ${(decodedUserInfo?.email) ? decodedUserInfo.email : "<TOKEN: EMAIL_NOT_FOUND>"}`));
+               console.log(
+                    chalk.red(
+                         `Edited token provided by USERID :- ${decodedUserInfo?.email ? decodedUserInfo.email : "<TOKEN: EMAIL_NOT_FOUND>"}`,
+                    ),
+               );
                return res
                     .status(401)
                     .clearCookie("OAuthRefreshToken")
@@ -270,15 +301,19 @@ const verifyOAuthUser = asyncHandler(async (req, res, next) => {
                          statusCode: 401,
                          message: "Cannot continue at the  moment",
                          success: false,
-                         data: { error: "TOKEN_MALFORMED" }
-                    })
+                         data: { error: "TOKEN_MALFORMED" },
+                    });
           }
 
           try {
                const decodedUserRefreshToken = await jwt.verify(OAuthRefreshToken, process.env.JWT_REFRESH_SECRET);
                const storedUserInfo = await RegisteredUsers.findOne({ email: decodedUserRefreshToken.email });
                if (!storedUserInfo) {
-                    console.log(chalk.red(`Got oAuth refresh token but user cannot be found in DB with EMAIL :- ${decodedUserInfo?.email}`));
+                    console.log(
+                         chalk.red(
+                              `Got oAuth refresh token but user cannot be found in DB with EMAIL :- ${decodedUserInfo?.email}`,
+                         ),
+                    );
                     return res
                          .status(500)
                          .clearCookie("OAuthRefreshToken")
@@ -286,12 +321,16 @@ const verifyOAuthUser = asyncHandler(async (req, res, next) => {
                               statusCode: 500,
                               message: "Something went wrong, please try again later",
                               success: false,
-                              data: { error: "SERVER_ERROR" }
-                         })
+                              data: { error: "SERVER_ERROR" },
+                         });
                }
 
                if (OAuthRefreshToken !== storedUserInfo.refreshToken) {
-                    console.log(chalk.red(`O Auth provided token doenst match with database, provided by EMAIL :- ${decodedUserRefreshToken?.email}`));
+                    console.log(
+                         chalk.red(
+                              `O Auth provided token doenst match with database, provided by EMAIL :- ${decodedUserRefreshToken?.email}`,
+                         ),
+                    );
                     return res
                          .status(500)
                          .clearCookie("OAuthRefreshToken")
@@ -299,44 +338,73 @@ const verifyOAuthUser = asyncHandler(async (req, res, next) => {
                               statusCode: 500,
                               message: "Cannoy continue at the moment",
                               data: {
-                                   error: "TOKEN_MISMATCH"
-                              }
-                         })
+                                   error: "TOKEN_MISMATCH",
+                              },
+                         });
                } else {
-                    const newOAuthAccessToken = await generateAccessToken("registered", { loginType: "google", fullName: decodedUserInfo?.name, email: decodedUserInfo?.email }, "15d");
-                    const newOAuthRefreshToken = await generateRefreshToken("registered", { loginType: "google", fullName: decodedUserInfo?.name, email: decodedUserInfo?.email }, "30d");
+                    const newOAuthAccessToken = await generateAccessToken(
+                         "registered",
+                         { loginType: "google", fullName: decodedUserInfo?.name, email: decodedUserInfo?.email },
+                         "15d",
+                    );
+                    const newOAuthRefreshToken = await generateRefreshToken(
+                         "registered",
+                         { loginType: "google", fullName: decodedUserInfo?.name, email: decodedUserInfo?.email },
+                         "30d",
+                    );
                     if (!newOAuthAccessToken || !newOAuthRefreshToken) {
                          console.log(chalk.red("Cannot generate new O auth access and refresh token"));
-                         throw new APIError(500, "Something went wrong while verifying user session", { error: "SERVER_ERROR" });
+                         throw new APIError(500, "Something went wrong while verifying user session", {
+                              error: "SERVER_ERROR",
+                         });
                     }
 
-                    const updatedOAuthUser = await RegisteredUsers.findOneAndUpdate({ refreshToken: OAuthRefreshToken }, { refreshToken: newOAuthRefreshToken }, { returnDocument: 'after' }).select("email contactNumber fullName loggedInOn loginType").lean();
+                    const updatedOAuthUser = await RegisteredUsers.findOneAndUpdate(
+                         { refreshToken: OAuthRefreshToken },
+                         { refreshToken: newOAuthRefreshToken },
+                         { returnDocument: "after" },
+                    )
+                         .select("email contactNumber fullName loggedInOn loginType")
+                         .lean();
                     if (!updatedOAuthUser) {
                          console.log(chalk.red("Cannot update O auth user refresh token"));
-                         throw new APIError(500, "Something went wrong, please try again later", { error: "SERVER_ERROR" });
+                         throw new APIError(500, "Something went wrong, please try again later", {
+                              error: "SERVER_ERROR",
+                         });
                     }
 
                     return res
                          .status(200)
                          .cookie("OAuthAccessToken", newOAuthAccessToken, issueCookieOptions("access"))
                          .cookie("OAuthRefreshToken", newOAuthRefreshToken, issueCookieOptions("refresh"))
-                         .json(new APIResponse(200, "User session verified", {
-                              email: updatedOAuthUser.email,
-                              fullName: updatedOAuthUser.fullName,
-                              contactNumber: updatedOAuthUser.contactNumber,
-                              loggedInOn: updatedOAuthUser.loggedInOn,
-                              loginType: updatedOAuthUser.loginType,
-                              OAuthAccessToken: newOAuthAccessToken
-                         }))
+                         .json(
+                              new APIResponse(200, "User session verified", {
+                                   email: updatedOAuthUser.email,
+                                   fullName: updatedOAuthUser.fullName,
+                                   contactNumber: updatedOAuthUser.contactNumber,
+                                   loggedInOn: updatedOAuthUser.loggedInOn,
+                                   loginType: updatedOAuthUser.loginType,
+                                   OAuthAccessToken: newOAuthAccessToken,
+                              }),
+                         );
                }
-
           } catch (error) {
-               console.log(error)
+               console.log(error);
                if (error.name === "TokenExpiredError") {
-                    const loggedOutOAuthUser = await RegisteredUsers.findOneAndUpdate({ email: decodedUserInfo.email }, { isLoggedOut: true }, { returnDocument: "after" });
+                    const loggedOutOAuthUser = await RegisteredUsers.findOneAndUpdate(
+                         { email: decodedUserInfo.email },
+                         { isLoggedOut: true },
+                         { returnDocument: "after" },
+                    );
                     if (!loggedOutOAuthUser) {
-                         console.log(chalk.red(`Cannot update expired oAuth user as LOGGEDOUT: true in database for email :- ${decodedUserInfo?.email}`));
-                         throw new APIError(500, "Something went wrong, please try again later", { error: "SERVER_ERROR" });
+                         console.log(
+                              chalk.red(
+                                   `Cannot update expired oAuth user as LOGGEDOUT: true in database for email :- ${decodedUserInfo?.email}`,
+                              ),
+                         );
+                         throw new APIError(500, "Something went wrong, please try again later", {
+                              error: "SERVER_ERROR",
+                         });
                     }
 
                     return res
@@ -346,8 +414,8 @@ const verifyOAuthUser = asyncHandler(async (req, res, next) => {
                               statusCode: 401,
                               message: "User session expired, please relogin",
                               success: false,
-                              data: { error: "SESSION_EXPIRED" }
-                         })
+                              data: { error: "SESSION_EXPIRED" },
+                         });
                }
           }
      }
@@ -359,7 +427,10 @@ const verifyOAuthUser = asyncHandler(async (req, res, next) => {
 
           try {
                await jwt.verify(OAuthAccessToken, process.env.JWT_ACCESS_SECRET);
-               const storedOAuthUser = await RegisteredUsers.findOne({ refreshToken: OAuthRefreshToken }).select("email fullName loggedInOn contactNumber loginType").select("-_id").lean();
+               const storedOAuthUser = await RegisteredUsers.findOne({ refreshToken: OAuthRefreshToken })
+                    .select("email fullName loggedInOn contactNumber loginType")
+                    .select("-_id")
+                    .lean();
                if (!storedOAuthUser) {
                     return res
                          .status(401)
@@ -369,20 +440,19 @@ const verifyOAuthUser = asyncHandler(async (req, res, next) => {
                               statusCode: 401,
                               message: "Cannot continue at the moment",
                               success: false,
-                              data: { error: "SERVER_ERROR" }
-                         })
+                              data: { error: "SERVER_ERROR" },
+                         });
                }
 
-               return res
-                    .status(200)
-                    .json(new APIResponse(200, "User verified successfully", {
+               return res.status(200).json(
+                    new APIResponse(200, "User verified successfully", {
                          email: storedOAuthUser.email,
                          fullName: storedOAuthUser.fullName,
                          contactNumber: storedOAuthUser.contactNumber,
                          loginType: storedOAuthUser.loginType,
-                         OAuthAccessToken: OAuthAccessToken
-                    }));
-
+                         OAuthAccessToken: OAuthAccessToken,
+                    }),
+               );
           } catch (error) {
                console.log(error);
                if (error.name === "TokenExpiredError") {
@@ -390,30 +460,41 @@ const verifyOAuthUser = asyncHandler(async (req, res, next) => {
                          email: decodedOAuthAccessToken.email,
                          fullName: decodedOAuthAccessToken.fullName,
                          loginType: decodedOAuthAccessToken.loginType,
-                         refreshToken: OAuthRefreshToken
-                    })
+                         refreshToken: OAuthRefreshToken,
+                    });
 
                     if (
                          OAuthVerifyResult === "USER_NOT_FOUND" ||
                          OAuthVerifyResult === "TOKEN_MISMATCH" ||
                          OAuthVerifyResult === "SERVER_ERROR"
-                    ) { throw new APIError(500, "Something went wrong, please try again later", { error: OAuthVerifyResult }) }
-                    else if (OAuthVerifyResult.refreshTokenUpdated) {
+                    ) {
+                         throw new APIError(500, "Something went wrong, please try again later", {
+                              error: OAuthVerifyResult,
+                         });
+                    } else if (OAuthVerifyResult.refreshTokenUpdated) {
                          return res
                               .status(200)
-                              .cookie("OAuthAccessToken", OAuthVerifyResult.newAccessToken, issueCookieOptions("access"))
-                              .cookie("OAuthRefreshToken", OAuthVerifyResult.newRefreshToken, issueCookieOptions("refresh"))
-                              .json(new APIResponse(200, "Successfully generated new OAuth session", {
-                                   OAuthAccessToken: OAuthVerifyResult.newAccessToken
-                              }))
-                    }
-                    else if (OAuthVerifyResult.isSessionExpired) {
+                              .cookie(
+                                   "OAuthAccessToken",
+                                   OAuthVerifyResult.newAccessToken,
+                                   issueCookieOptions("access"),
+                              )
+                              .cookie(
+                                   "OAuthRefreshToken",
+                                   OAuthVerifyResult.newRefreshToken,
+                                   issueCookieOptions("refresh"),
+                              )
+                              .json(
+                                   new APIResponse(200, "Successfully generated new OAuth session", {
+                                        OAuthAccessToken: OAuthVerifyResult.newAccessToken,
+                                   }),
+                              );
+                    } else if (OAuthVerifyResult.isSessionExpired) {
                          return res
                               .status(401)
                               .clearCookie("OAuthAccessToken")
                               .clearCookie("OAuthRefreshToken")
                               .json(new APIResponse(401, "User session has been expired, please relogin", undefined));
-
                     }
                } else if (error.name === "NotBeforeError" || error.name === "JsonWebTokenError") {
                     console.log(chalk.red(`Malformed token provided by :- ${decodedOAuthAccessToken.email}`));
@@ -425,124 +506,141 @@ const verifyOAuthUser = asyncHandler(async (req, res, next) => {
                               statusCode: 401,
                               message: "Cannot continue at the moment",
                               success: false,
-                              data: { error: "TOKEN_MALFORMED" }
-                         })
-
+                              data: { error: "TOKEN_MALFORMED" },
+                         });
                } else {
-                    console.log(chalk.red("Unknown error occured in catch block of verifying OAuth user"))
+                    console.log(chalk.red("Unknown error occured in catch block of verifying OAuth user"));
                     throw new APIError(500, "Something went wrong, please try again later", {
-                         error: "SERVER_ERROR"
-
-                    })
+                         error: "SERVER_ERROR",
+                    });
                }
           }
      }
-})
+});
 
 const verifyGuestUser = asyncHandler(async (req, res, next) => {
-     const guestAccessToken = req.cookies.guestAccessToken;
-     const guestRefreshToken = req.cookies.guestRefreshToken;
+     const accessToken = req.cookies.user_session_A;
+     const refreshToken = req.cookies.user_session_R;
 
-     if (!guestAccessToken && !guestRefreshToken) return next();
+     if (!accessToken && !refreshToken) return next();
 
-     if (!guestAccessToken && guestRefreshToken) {
-          const decodedUserData = jwt.decode(guestRefreshToken);
-          if (decodedUserData?.loginType !== "guest") {
-               console.log(chalk.red("Edited token provided"));
-               throw new APIError(401, "Cannot continue at the moment", { error: "TOKEN_MALFORMED" })
+     if (!accessToken && refreshToken) {
+          const decodedRefreshToken = jwt.decode(refreshToken);
+          console.log(decodedRefreshToken);
+          if (!allowedLoginTypes.includes(decodedRefreshToken.loginType)) {
+               throw new APIError(401, "Cannot continue at the moment", { error: "UNAUTHORISED_ACCESS" });
           }
+
           try {
-               const decodedRefreshToken = await jwt.verify(guestRefreshToken, process.env.JWT_REFRESH_SECRET, { algorithms: ["HS256"] });
-               const storedUser = await GuestUser.findOne({ guestID: decodedUserData?.guestID });
-               // const storedUser = await GuestUser.findOne({ guestID: decodedRefreshToken?.guestID });
-               if (!storedUser) {
-                    console.log(chalk.red(`Got refresh token but user not found in DB USERID :- ${decodedUserData.guestID}`));
-                    return res
-                         .status(500)
-                         .clearCookie("guestRefreshToken")
-                         .json({
-                              statusCode: 500,
-                              message: "Cannot continue at the moment",
-                              success: false,
-                              data: { error: "SERVER_ERROR" }
-                         })
+               const verifiedRefreshToken = await jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+               const newAccessToken = await generateAccessToken(
+                    {
+                         guestID: verifiedRefreshToken.guestID,
+                         loginType: verifiedRefreshToken.loginType,
+                         accountyCreatedAt: verifiedRefreshToken.createdOn,
+                    },
+                    "15d",
+               );
+               const newRefreshToken = await generateRefreshToken(
+                    {
+                         guestID: verifiedRefreshToken.guestID,
+                         loginType: verifiedRefreshToken.loginType,
+                         accountyCreatedAt: verifiedRefreshToken.createdOn,
+                    },
+                    "30d",
+               );
+               if (!newAccessToken || !newRefreshToken) {
+                    throw new APIError(500, "Something went wrong, please try again later", {
+                         error: "SERVER_ERROR",
+                    });
                }
 
-               // Changed or replaced refreshtoken is not allowed
-               if (guestRefreshToken !== storedUser.refreshToken) {
-                    console.log(chalk.bgRed("Refresh token doesnt match!!!"));
-                    throw new APIError(401, "Cannot continue at the moment", { error: "UNAUTHORIZED_ACCESS" });
-               }
-
-               // Check authenticity of the refresh token to issue a new access token
-               const newGuestAccessToken = await generateAccessToken("guest", { guestID: storedUser.guestID, loginType: "guest" }, "15d");
-               const newGuestRefreshToken = await generateRefreshToken("guest", { guestID: storedUser.guestID, loginType: "guest" }, "30d");
-               if (!newGuestAccessToken || !newGuestRefreshToken) {
-                    console.log(chalk.bgRed("Cannot create a new guest tokens"));
+               const guestUser = await GuestUser.findOneAndUpdate(
+                    { guestID: verifiedRefreshToken.guestID },
+                    { refreshToken: newRefreshToken },
+                    { returnDocument: "after" },
+               );
+               if (!guestUser) {
                     throw new APIError(500, "Something went wrong, please try again later", { error: "SERVER_ERROR" });
                }
 
-               storedUser.refreshToken = newGuestRefreshToken;
-               const updateUserRefreshToken = await storedUser.save();
-               // const updateUserRefreshToken = await GuestUser.findOneAndUpdate({ guestID: decodedRefreshToken?.guestID }, { refreshToken: newGuestRefreshToken });
-               // if (!updateUserRefreshToken) {
-               //      console.log(chalk.red("Cannot update user refresh token in database"));
-               //      throw new APIError(500, "Something went wrong, please try again later", { error: "SERVER_ERROR" });
-               // }
-
                return res
                     .status(200)
-                    .cookie("guestAccessToken", newGuestAccessToken, issueCookieOptions("access"))
-                    .cookie("guestRefreshToken", newGuestRefreshToken, issueCookieOptions("refresh"))
-                    .end()
-
+                    .cookie("user_session_A", newAccessToken, issueCookieOptions("access"))
+                    .cookie("user_session_R", newRefreshToken, issueCookieOptions("refresh"))
+                    .redirect(`${process.env.DEPLOYED_FRONTEND_URL}/${verifiedRefreshToken.guestID}`);
           } catch (error) {
+               console.log(error);
+               if (error.name === "NotBeforeError") {
+                    throw new APIError(401, "Cannot continue at the moment", { error: "UNAUTHORISED_ACCESS" });
+               }
+               if (error.name === "JsonWebTokenError") {
+                    throw new APIError(401, "Cannot continue at the moment", { error: "UNAUTHORISED_ACCESS" });
+               }
                if (error.name === "TokenExpiredError") {
-                    console.log(chalk.red("User refresh token expired"))
-                    // const decodedUser = jwt.decode(guestRefreshToken);
-                    const deletedUser = await GuestUser.findOneAndDelete({ guestID: decodedUserData.guestID }).select("guestID createdOn fullName");
-                    if (!deletedUser) {
-                         console.log(chalk.red("Error deleting the user"));
-                         throw new APIError(500, "Something went wrong, please try again later", { error: "SERVER_ERROR" });
+                    const guestUser = await GuestUser.findOne({ guestID: decodedRefreshToken.guestID });
+                    if (!guestUser) {
+                         throw new APIError(404, "Guest account doesn't exist", { error: "USER_NOT_FOUND" });
                     }
+
+                    if (guestUser.refreshToken !== refreshToken) {
+                         throw new APIError(401, "Cannot continue at the moment", { error: "UNAUTHORISED_ACCESS" });
+                    }
+
+                    const newAccessToken = await generateAccessToken(
+                         {
+                              guestID: decodedRefreshToken.guestID,
+                              loginType: decodedRefreshToken.loginType,
+                              accountyCreatedAt: decodedRefreshToken.createdOn,
+                         },
+                         "15d",
+                    );
+                    const newRefreshToken = await generateRefreshToken(
+                         {
+                              guestID: decodedRefreshToken.guestID,
+                              loginType: decodedRefreshToken.loginType,
+                              accountyCreatedAt: decodedRefreshToken.createdOn,
+                         },
+                         "30d",
+                    );
+                    if (!newAccessToken || !newRefreshToken) {
+                         throw new APIError(500, "Something went wrong, please try again later", {
+                              error: "SERVER_ERROR",
+                         });
+                    }
+
+                    guestUser.refreshToken = newRefreshToken;
+                    await guestUser.save();
+
                     return res
                          .status(200)
-                         .clearCookie("guestRefreshToken")
-                         .json(new APIResponse(200, "User account has been deleted successfully", { deletedUser }))
+                         .cookie("user_session_A", newAccessToken, issueCookieOptions("access"))
+                         .cookie("user_session_R", newRefreshToken, issueCookieOptions("refresh"))
+                         .redirect(`${process.env.DEPLOYED_FRONTEND_URL}/${guestUser.guestID}`);
                }
-               if (error.name === "NotBeforeError" || error.name === "JsonWebTokenError") {
-                    console.log(chalk.bgRed("Catch block error with token verification"));
-
-                    return res
-                         .status(401)
-                         .clearCookie("guestRefreshToken")
-                         .json({
-                              statusCode: 401,
-                              message: "Cannot continue at the moment, please try again later",
-                              success: false,
-                              data: {
-                                   error: "UNAUTHORIZED_ACCESS"
-                              }
-                         })
-               }
-               console.log(chalk.red("Unexpected Error occured in guest verifier catch block"))
                throw new APIError(500, "Something went wrong, please try again later", { error: "SERVER_ERROR" });
           }
      }
-
      // CASE 3 :- Both access and refresh tokens are present
-     if (guestAccessToken && guestRefreshToken) {
-          const decodedUserData = jwt.decode(guestAccessToken);
+     if (accessToken && refreshToken) {
+          const decodedUserData = jwt.decode(accessToken);
           if (decodedUserData?.loginType !== "guest") {
                console.log(chalk.red("Edited Access token provided"));
-               throw new APIError(401, "Cannot continue at the moment", { error: "TOKEN_MALFORMED" })
+               throw new APIError(401, "Cannot continue at the moment", { error: "TOKEN_MALFORMED" });
           }
           try {
-               const decodedAccessToken = await jwt.verify(guestAccessToken, process.env.JWT_ACCESS_SECRET);
-               const storedGuestUser = await GuestUser.findOne({ guestID: decodedUserData?.guestID }).select("guestID fullName createdOn").select("-refreshToken -_id").lean();
-               // const storedGuestUser = await GuestUser.findOne({ guestID: decodedAccessToken?.guestID }).select("guestID fullName createdOn").select("-refreshToken -_id").lean();
+               const decodedAccessToken = await jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET);
+               const storedGuestUser = await GuestUser.findOne({ guestID: decodedUserData?.guestID })
+                    .select("guestID fullName createdOn")
+                    .select("-refreshToken -_id")
+                    .lean();
+               // const storedGuestUser = await GuestUser.findOne({ guestID: accessToken?.guestID }).select("guestID fullName createdOn").select("-refreshToken -_id").lean();
                if (!storedGuestUser) {
-                    console.log(chalk.red(`Got both tokens but user cant be found in db GUESTID :- ${decodedUserData.guestID}`));
+                    console.log(
+                         chalk.red(
+                              `Got both tokens but user cant be found in db GUESTID :- ${decodedUserData.guestID}`,
+                         ),
+                    );
                     return res
                          .status(500)
                          .clearCookie("guestAccessToken")
@@ -551,42 +649,60 @@ const verifyGuestUser = asyncHandler(async (req, res, next) => {
                               statusCode: 500,
                               message: "Something went wrong, please try again later",
                               success: false,
-                              data: { error: "SERVER_ERROR" }
-                         })
+                              data: { error: "SERVER_ERROR" },
+                         });
                }
 
-               return res
-                    .status(200)
-                    .json(new APIResponse(200, "Guest user account verified", { ...storedGuestUser }))
-
+               return res.status(200).json(new APIResponse(200, "Guest user account verified", { ...storedGuestUser }));
           } catch (error) {
                if (error.name === "TokenExpiredError") {
                     console.log("User access token expired");
-                    const refreshTokenVerifyResult = await verifyGuestRefreshToken({ guestID: decodedUserData?.guestID }, guestRefreshToken);
+                    const refreshTokenVerifyResult = await verifyGuestRefreshToken(
+                         { guestID: decodedUserData?.guestID },
+                         guestRefreshToken,
+                    );
                     if (
                          refreshTokenVerifyResult === "USER_NOT_FOUND" ||
                          refreshTokenVerifyResult === "TOKEN_MISMATCH" ||
                          refreshTokenVerifyResult === "SERVER_ERROR" ||
                          refreshTokenVerifyResult === "TOKEN_EXPIRED"
                     ) {
-                         throw new APIError(500, "Cannot continue at the moment, please try again later", { error: refreshTokenVerifyResult });
-                    }
-                    else if (refreshTokenVerifyResult?.userDeleted) {
+                         throw new APIError(500, "Cannot continue at the moment, please try again later", {
+                              error: refreshTokenVerifyResult,
+                         });
+                    } else if (refreshTokenVerifyResult?.userDeleted) {
                          return res
                               .status(200)
                               .clearCookie("guestAccessToken")
                               .clearCookie("guestRefreshToken")
-                              .json(new APIResponse(200, "User account has been deleted successfully", { deletedUser: refreshTokenVerifyResult.deletedUserInfo }))
-
+                              .json(
+                                   new APIResponse(200, "User account has been deleted successfully", {
+                                        deletedUser: refreshTokenVerifyResult.deletedUserInfo,
+                                   }),
+                              );
                     } else if (refreshTokenVerifyResult?.refreshTokenUpdated) {
                          return res
                               .status(200)
-                              .cookie("guestAccessToken", refreshTokenVerifyResult.newAccessToken, issueCookieOptions("access"))
-                              .cookie("guestRefreshToken", refreshTokenVerifyResult.newRefreshToken, issueCookieOptions("refresh"))
-                              .json(new APIResponse(200, "Successfully generated new guest session", {
-                                   guestAccessToken: refreshTokenVerifyResult.newAccessToken
-                              }))
-                    } else { throw new APIError(500, "Something went wrong, please try again later", { error: "SERVER_ERROR" }) }
+                              .cookie(
+                                   "guestAccessToken",
+                                   refreshTokenVerifyResult.newAccessToken,
+                                   issueCookieOptions("access"),
+                              )
+                              .cookie(
+                                   "guestRefreshToken",
+                                   refreshTokenVerifyResult.newRefreshToken,
+                                   issueCookieOptions("refresh"),
+                              )
+                              .json(
+                                   new APIResponse(200, "Successfully generated new guest session", {
+                                        guestAccessToken: refreshTokenVerifyResult.newAccessToken,
+                                   }),
+                              );
+                    } else {
+                         throw new APIError(500, "Something went wrong, please try again later", {
+                              error: "SERVER_ERROR",
+                         });
+                    }
                }
                if (error.name === "NotBeforeError" || error.name === "JsonWebTokenError") {
                     console.log(chalk.red(`Token error caused by guest ID :- ${storedGuestUser.guestID}`));
@@ -598,21 +714,14 @@ const verifyGuestUser = asyncHandler(async (req, res, next) => {
           }
      }
 
-     return res
-          .status(500)
-          .json({
-               statusCode: 500,
-               message: "Cannot continue at the moment, please try again later",
-               success: false,
-               data: {
-                    error: "SERVER_ERROR"
-               }
-          })
+     return res.status(500).json({
+          statusCode: 500,
+          message: "Cannot continue at the moment, please try again later",
+          success: false,
+          data: {
+               error: "SERVER_ERROR",
+          },
+     });
+});
 
-})
-
-export {
-     verifyGuestUser,
-     verifyOAuthUser,
-     verifyMagicLinkUser
-}
+export { verifyGuestUser, verifyOAuthUser, verifyMagicLinkUser };
