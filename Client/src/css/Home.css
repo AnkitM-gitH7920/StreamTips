@@ -1,0 +1,143 @@
+/* StreamTips public creator home */
+.home-page {
+    min-height: 100vh;
+    background: radial-gradient(circle at 50% -10%, rgba(6,78,59,.10), transparent 32rem), var(--background, #f8f6ef);
+    color: #10211d;
+}
+.home-nav {
+    width: min(1180px, calc(100% - 40px)); height: 76px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+}
+.home-brand { display: inline-flex; text-decoration: none; }
+.home-nav-tip, .home-support-button, .home-card-button {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    text-decoration: none; font-weight: 800; transition: transform .2s ease, box-shadow .2s ease;
+}
+.home-nav-tip {
+    min-height: 40px; padding: 0 16px; border: 1px solid rgba(6,78,59,.16);
+    border-radius: 12px; color: #064e3b; background: rgba(255,255,255,.64);
+}
+.home-nav-tip:hover, .home-support-button:hover, .home-card-button:hover { transform: translateY(-2px); }
+.home-main { width: min(1180px, calc(100% - 40px)); margin: 0 auto; padding: 18px 0 72px; }
+.home-hero {
+    overflow: hidden; border: 1px solid rgba(6,78,59,.10); border-radius: 28px;
+    background: #fffdf8; box-shadow: 0 18px 50px rgba(16,33,29,.08);
+}
+.home-cover {
+    position: relative; height: 250px; overflow: hidden;
+    background: linear-gradient(135deg, #064e3b 0%, #082f26 48%, #0f172a 100%);
+}
+.home-cover-glow { position: absolute; border-radius: 999px; filter: blur(8px); opacity: .55; }
+.home-cover-glow-one { width: 300px; height: 300px; right: 7%; top: -160px; background: rgba(248,231,201,.22); }
+.home-cover-glow-two { width: 220px; height: 220px; left: 10%; bottom: -150px; background: rgba(16,185,129,.20); }
+.home-cover-grid {
+    position: absolute; inset: 0; opacity: .14;
+    background-image: linear-gradient(rgba(248,231,201,.20) 1px, transparent 1px), linear-gradient(90deg, rgba(248,231,201,.20) 1px, transparent 1px);
+    background-size: 44px 44px; mask-image: linear-gradient(to bottom, black, transparent);
+}
+.home-profile-row {
+    position: relative; display: flex; align-items: center; gap: 24px; padding: 0 34px 32px;
+}
+.home-avatar-wrap {
+    position: relative; width: 132px; height: 132px; flex: 0 0 132px; margin-top: -66px;
+    border: 7px solid #fffdf8; border-radius: 50%; background: #fffdf8;
+    box-shadow: 0 12px 30px rgba(0,0,0,.14);
+}
+.home-avatar { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.home-verified {
+    position: absolute; right: 3px; bottom: 5px; display: grid; place-items: center;
+    width: 27px; height: 27px; color: #fff; background: #064e3b; border: 3px solid #fffdf8; border-radius: 50%;
+}
+.home-profile-copy { min-width: 0; flex: 1; padding-top: 12px; }
+.home-eyebrow, .home-section-kicker {
+    color: #0d7057; font-size: 11px; font-weight: 900; letter-spacing: .13em; text-transform: uppercase;
+}
+.home-eyebrow { display: flex; align-items: center; gap: 7px; margin-bottom: 7px; }
+.home-live-dot { width: 7px; height: 7px; border-radius: 50%; background: #16a34a; box-shadow: 0 0 0 4px rgba(22,163,74,.10); }
+.home-profile-copy h1 {
+    display: flex; align-items: center; gap: 8px; margin: 0; color: #062f26;
+    font-size: clamp(30px, 4vw, 42px); line-height: 1.05; letter-spacing: -.04em;
+}
+.home-title-check { color: #0d8b6a; flex: 0 0 auto; }
+.home-handle { margin: 8px 0 0; color: #71807b; font-size: 14px; font-weight: 600; }
+.home-support-button {
+    min-height: 48px; padding: 0 19px; flex: 0 0 auto; color: #f8e7c9;
+    background: #064e3b; border-radius: 13px; box-shadow: 0 8px 20px rgba(6,78,59,.16);
+}
+.home-content { display: grid; grid-template-columns: minmax(0,1.65fr) minmax(300px,.9fr); gap: 22px; margin-top: 22px; }
+.home-left, .home-right { display: flex; flex-direction: column; gap: 22px; }
+.home-card {
+    padding: 28px; border: 1px solid rgba(6,78,59,.09); border-radius: 22px;
+    background: rgba(255,253,248,.88); box-shadow: 0 12px 35px rgba(16,33,29,.055);
+}
+.home-section-heading { margin-bottom: 20px; }
+.home-section-heading h2, .home-support-card h2 { margin: 5px 0 0; color: #092f27; font-size: 21px; letter-spacing: -.025em; }
+.home-about > p { max-width: 760px; margin: 0; color: #63716d; font-size: 15px; line-height: 1.8; }
+.home-about-meta { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 20px; color: #87918d; font-size: 12px; font-weight: 700; }
+.home-highlights { display: grid; gap: 10px; }
+.home-highlight {
+    display: flex; align-items: center; gap: 14px; padding: 15px;
+    border: 1px solid rgba(6,78,59,.08); border-radius: 15px; background: #fffefa;
+    transition: border-color .2s ease, transform .2s ease;
+}
+.home-highlight:hover { border-color: rgba(6,78,59,.20); transform: translateY(-1px); }
+.home-highlight-icon {
+    display: grid; place-items: center; width: 38px; height: 38px; flex: 0 0 38px;
+    color: #0b755a; background: rgba(6,78,59,.08); border-radius: 11px;
+}
+.home-highlight-copy { min-width: 0; flex: 1; }
+.home-highlight-copy h3 { margin: 0; color: #163a32; font-size: 14px; }
+.home-highlight-copy p { margin: 3px 0 5px; color: #6e7c78; font-size: 13px; }
+.home-highlight-copy span { color: #9aa39f; font-size: 11px; font-weight: 700; }
+.home-highlight-arrow { color: #9aa39f; flex: 0 0 auto; }
+.home-support-card {
+    background: radial-gradient(circle at 100% 0%, rgba(248,231,201,.16), transparent 13rem), #064e3b;
+    border-color: transparent; color: #f8e7c9;
+}
+.home-support-icon {
+    display: grid; place-items: center; width: 42px; height: 42px; margin-bottom: 20px;
+    color: #064e3b; background: #f8e7c9; border-radius: 13px;
+}
+.home-support-card .home-section-kicker { color: rgba(248,231,201,.66); }
+.home-support-card h2 { color: #fff8e9; font-size: 26px; }
+.home-support-card p { margin: 12px 0 20px; color: rgba(248,231,201,.72); font-size: 13px; line-height: 1.7; }
+.home-card-button { width: 100%; min-height: 46px; color: #064e3b; background: #f8e7c9; border-radius: 12px; }
+.home-support-card small { display: block; margin-top: 13px; color: rgba(248,231,201,.48); text-align: center; font-size: 10px; font-weight: 700; }
+.home-links-card .home-section-heading { margin-bottom: 14px; }
+.home-social-list { display: grid; gap: 8px; }
+.home-social-link {
+    display: flex; align-items: center; gap: 11px; padding: 11px; color: inherit; text-decoration: none;
+    border-radius: 13px; transition: background .2s ease;
+}
+.home-social-link:hover { background: rgba(6,78,59,.05); }
+.home-social-icon { display: grid; place-items: center; width: 35px; height: 35px; flex: 0 0 35px; color: #0a7056; background: rgba(6,78,59,.07); border-radius: 10px; }
+.home-social-link > span:nth-child(2) { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.home-social-link strong { color: #25453e; font-size: 12px; }
+.home-social-link small { overflow: hidden; color: #87918d; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.home-social-link > svg { color: #a1aaa6; }
+
+@media (max-width: 850px) {
+    .home-profile-row { flex-wrap: wrap; }
+    .home-support-button { margin-left: 156px; margin-top: -4px; }
+    .home-content { grid-template-columns: 1fr; }
+    .home-right { display: grid; grid-template-columns: 1fr 1fr; align-items: start; }
+}
+@media (max-width: 620px) {
+    .home-nav, .home-main { width: min(100% - 24px, 1180px); }
+    .home-nav { height: 68px; }
+    .home-nav-tip { padding: 0 12px; font-size: 12px; }
+    .home-cover { height: 170px; }
+    .home-profile-row { gap: 16px; padding: 0 18px 22px; }
+    .home-avatar-wrap { width: 96px; height: 96px; flex-basis: 96px; margin-top: -48px; border-width: 5px; }
+    .home-verified { width: 23px; height: 23px; right: 0; bottom: 2px; border-width: 2px; }
+    .home-profile-copy { padding-top: 10px; }
+    .home-profile-copy h1 { font-size: 27px; }
+    .home-support-button { width: 100%; margin: 0; }
+    .home-card { padding: 21px; border-radius: 18px; }
+    .home-right { display: flex; }
+}
+@media (max-width: 420px) {
+    .home-nav-tip svg { display: none; }
+    .home-profile-copy { flex-basis: calc(100% - 112px); }
+    .home-profile-copy h1 { font-size: 24px; }
+}

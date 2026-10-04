@@ -10,56 +10,32 @@ import jwt from "jsonwebtoken";
 
 const allowedLoginTypes = ["google", "magicLink", "guest"];
 // Async helper functions
-async function verifyGuestRefreshToken(data, refreshToken) {
-     const { guestID } = data;
+async function verifyGuestRefreshToken(refreshToken, decodedRefreshToken) {
+     const { guestID, accountCreatedAt, loginType } = decodedRefreshToken;
      try {
-          const decodedRefreshToken = await jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-          const storedUser = await GuestUser.findOne({ guestID });
-          if (!storedUser) {
-               console.log(chalk.red("User not found in db using decoded access token data"));
-               return "USER_NOT_FOUND";
-          }
-          console.log(storedUser);
+          await jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+          const storedGuestUser = await GuestUser.findOne({ refreshToken });
+          if (!storedGuestUser) return "NOT_FOUND";
 
-          if (refreshToken !== storedUser.refreshToken) {
-               console.log(chalk.red("Refresh token doesnt match"));
-               return "TOKEN_MISMATCH";
-          } else {
-               const newGuestAccessToken = await generateAccessToken("guest", { guestID, loginType: "guest" }, "15d");
-               const newGuestRefreshToken = await generateRefreshToken("guest", { guestID, loginType: "guest" }, "30d");
-               if (!newGuestAccessToken || !newGuestRefreshToken) {
-                    console.log(chalk.red("Token generation error in verifyGuestRefreshToken()"));
-                    return "SERVER_ERROR";
-               }
+          if (storedGuestUser.refreshToken !== refreshToken) return "UNAUTHORISED_ACCESS";
+          const newAccessToken = await generateAccessToken({ guestID, accountCreatedAt, loginType }, "15d");
+          const newRefreshToken = await generateRefreshToken({ guestID, accountCreatedAt, loginType }, "30d");
+          if (!newAccessToken || !newRefreshToken) return "SERVER_ERROR";
 
-               storedUser.refreshToken = newGuestRefreshToken;
-               await storedUser.save();
-
-               return {
-                    refreshTokenUpdated: true,
-                    newAccessToken: newGuestAccessToken,
-                    newRefreshToken: newGuestRefreshToken,
-               };
-          }
+          return {
+               refreshTokenUpdated: true,
+               accessToken: newAccessToken,
+               refreshToken: newRefreshToken,
+          };
      } catch (error) {
-          console.log(chalk.red("Error in verifier function :-"));
-          console.log(error);
+          if (error.name === "NotBeforeError") return "UNAUTHORISED_ACCESS";
+          if (error.name === "JsonWebTokenError") return "UNAUTHORISED_ACCESS";
           if (error.name === "TokenExpiredError") {
-               console.log("Guest Refresh token expired");
-               const deletedUser = await GuestUser.findOneAndDelete({ guestID }).select("guestID createdOn fullName");
-               if (!deletedUser) {
-                    console.log(chalk.red(`User session expired, CANNOT DELETE USER with USERID :- ${userID}`));
-                    return "SERVER_ERROR";
-               } else {
-                    return {
-                         userDeleted: true,
-                         deletedUserInfo: deletedUser,
-                    };
-               }
-          } else {
-               console.log(chalk.red("Something went wrong in verifyGuestRefreshToken()"));
-               return "SERVER_ERROR";
+               const deletedGuestUser = await GuestUser.findOneAndDelete({ refreshToken });
+               if (!deletedGuestUser) return "SERVER_ERROR";
+               return { accountDeleted: true };
           }
+          return "SERVER_ERROR";
      }
 }
 async function verifyRegisteredUserRefreshToken(data) {
@@ -537,7 +513,7 @@ const verifyGuestUser = asyncHandler(async (req, res, next) => {
                     {
                          guestID: verifiedRefreshToken.guestID,
                          loginType: verifiedRefreshToken.loginType,
-                         accountyCreatedAt: verifiedRefreshToken.createdOn,
+                         accountCreatedAt: verifiedRefreshToken.createdOn,
                     },
                     "15d",
                );
@@ -545,7 +521,7 @@ const verifyGuestUser = asyncHandler(async (req, res, next) => {
                     {
                          guestID: verifiedRefreshToken.guestID,
                          loginType: verifiedRefreshToken.loginType,
-                         accountyCreatedAt: verifiedRefreshToken.createdOn,
+                         accountCreatedAt: verifiedRefreshToken.createdOn,
                     },
                     "30d",
                );
@@ -568,7 +544,7 @@ const verifyGuestUser = asyncHandler(async (req, res, next) => {
                     .status(200)
                     .cookie("user_session_A", newAccessToken, issueCookieOptions("access"))
                     .cookie("user_session_R", newRefreshToken, issueCookieOptions("refresh"))
-                    .redirect(`${process.env.DEPLOYED_FRONTEND_URL}/${verifiedRefreshToken.guestID}`);
+                    .redirect(`${process.env.DEPLOYED_FRONTEND_URL}/home/${verifiedRefreshToken.guestID}`);
           } catch (error) {
                console.log(error);
                if (error.name === "NotBeforeError") {
@@ -591,7 +567,7 @@ const verifyGuestUser = asyncHandler(async (req, res, next) => {
                          {
                               guestID: decodedRefreshToken.guestID,
                               loginType: decodedRefreshToken.loginType,
-                              accountyCreatedAt: decodedRefreshToken.createdOn,
+                              accountCreatedAt: decodedRefreshToken.createdOn,
                          },
                          "15d",
                     );
@@ -599,7 +575,7 @@ const verifyGuestUser = asyncHandler(async (req, res, next) => {
                          {
                               guestID: decodedRefreshToken.guestID,
                               loginType: decodedRefreshToken.loginType,
-                              accountyCreatedAt: decodedRefreshToken.createdOn,
+                              accountCreatedAt: decodedRefreshToken.createdOn,
                          },
                          "30d",
                     );
@@ -616,112 +592,106 @@ const verifyGuestUser = asyncHandler(async (req, res, next) => {
                          .status(200)
                          .cookie("user_session_A", newAccessToken, issueCookieOptions("access"))
                          .cookie("user_session_R", newRefreshToken, issueCookieOptions("refresh"))
-                         .redirect(`${process.env.DEPLOYED_FRONTEND_URL}/${guestUser.guestID}`);
+                         .redirect(`${process.env.DEPLOYED_FRONTEND_URL}/home/${guestUser.guestID}`);
                }
                throw new APIError(500, "Something went wrong, please try again later", { error: "SERVER_ERROR" });
           }
      }
+
      // CASE 3 :- Both access and refresh tokens are present
      if (accessToken && refreshToken) {
-          const decodedUserData = jwt.decode(accessToken);
-          if (decodedUserData?.loginType !== "guest") {
-               console.log(chalk.red("Edited Access token provided"));
-               throw new APIError(401, "Cannot continue at the moment", { error: "TOKEN_MALFORMED" });
+          const decodedAccessToken = jwt.decode(accessToken);
+          const decodedRefreshToken = jwt.decode(refreshToken);
+          if (!allowedLoginTypes.includes(decodedAccessToken.loginType)) {
+               throw new APIError(401, "Cannot continue at the moment", { error: "UNAUTHORISED_ACCESS" });
           }
+          if (
+               decodedAccessToken.loginType !== decodedRefreshToken.loginType ||
+               decodedAccessToken.guestID !== decodedRefreshToken.guestID
+          ) {
+               throw new APIError(401, "Cannot continue at the moment", { error: "UNAUTHORISED_ACCESS" });
+          }
+
           try {
-               const decodedAccessToken = await jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET);
-               const storedGuestUser = await GuestUser.findOne({ guestID: decodedUserData?.guestID })
-                    .select("guestID fullName createdOn")
-                    .select("-refreshToken -_id")
-                    .lean();
-               // const storedGuestUser = await GuestUser.findOne({ guestID: accessToken?.guestID }).select("guestID fullName createdOn").select("-refreshToken -_id").lean();
+               await jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET);
+
+               const guestID = decodedAccessToken.guestID;
+               const storedGuestUser = await GuestUser.findOne({ guestID });
                if (!storedGuestUser) {
-                    console.log(
-                         chalk.red(
-                              `Got both tokens but user cant be found in db GUESTID :- ${decodedUserData.guestID}`,
-                         ),
-                    );
                     return res
-                         .status(500)
-                         .clearCookie("guestAccessToken")
-                         .clearCookie("guestRefreshToken")
+                         .status(404)
+                         .clearCookie("user_session_A")
+                         .clearCookie("user_session_R")
                          .json({
-                              statusCode: 500,
-                              message: "Something went wrong, please try again later",
+                              statusCode: 404,
+                              message: "Guest account cannot be found",
                               success: false,
-                              data: { error: "SERVER_ERROR" },
+                              data: { error: "USER_NOT_FOUND" },
                          });
                }
 
-               return res.status(200).json(new APIResponse(200, "Guest user account verified", { ...storedGuestUser }));
-          } catch (error) {
-               if (error.name === "TokenExpiredError") {
-                    console.log("User access token expired");
-                    const refreshTokenVerifyResult = await verifyGuestRefreshToken(
-                         { guestID: decodedUserData?.guestID },
-                         guestRefreshToken,
-                    );
-                    if (
-                         refreshTokenVerifyResult === "USER_NOT_FOUND" ||
-                         refreshTokenVerifyResult === "TOKEN_MISMATCH" ||
-                         refreshTokenVerifyResult === "SERVER_ERROR" ||
-                         refreshTokenVerifyResult === "TOKEN_EXPIRED"
-                    ) {
-                         throw new APIError(500, "Cannot continue at the moment, please try again later", {
-                              error: refreshTokenVerifyResult,
-                         });
-                    } else if (refreshTokenVerifyResult?.userDeleted) {
-                         return res
-                              .status(200)
-                              .clearCookie("guestAccessToken")
-                              .clearCookie("guestRefreshToken")
-                              .json(
-                                   new APIResponse(200, "User account has been deleted successfully", {
-                                        deletedUser: refreshTokenVerifyResult.deletedUserInfo,
-                                   }),
-                              );
-                    } else if (refreshTokenVerifyResult?.refreshTokenUpdated) {
-                         return res
-                              .status(200)
-                              .cookie(
-                                   "guestAccessToken",
-                                   refreshTokenVerifyResult.newAccessToken,
-                                   issueCookieOptions("access"),
-                              )
-                              .cookie(
-                                   "guestRefreshToken",
-                                   refreshTokenVerifyResult.newRefreshToken,
-                                   issueCookieOptions("refresh"),
-                              )
-                              .json(
-                                   new APIResponse(200, "Successfully generated new guest session", {
-                                        guestAccessToken: refreshTokenVerifyResult.newAccessToken,
-                                   }),
-                              );
-                    } else {
-                         throw new APIError(500, "Something went wrong, please try again later", {
-                              error: "SERVER_ERROR",
-                         });
-                    }
-               }
-               if (error.name === "NotBeforeError" || error.name === "JsonWebTokenError") {
-                    console.log(chalk.red(`Token error caused by guest ID :- ${storedGuestUser.guestID}`));
+               const newAccessToken = await generateAccessToken(
+                    {
+                         loginType: decodedAccessToken.loginType,
+                         guestID: decodedAccessToken.guestID,
+                         accountCreatedAt: decodedAccessToken.createdOn,
+                    },
+                    "15d",
+               );
+               const newRefreshToken = await generateRefreshToken(
+                    {
+                         loginType: decodedAccessToken.loginType,
+                         guestID: decodedAccessToken.guestID,
+                         accountCreatedAt: decodedAccessToken.createdOn,
+                    },
+                    "30d",
+               );
+               if (!newAccessToken || !newRefreshToken) {
                     throw new APIError(500, "Something went wrong, please try again later", { error: "SERVER_ERROR" });
                }
 
-               console.log(chalk.red(`UNEXPECTED ERROR :- ${error.name}`));
+               storedGuestUser.refreshToken = newRefreshToken;
+               await storedGuestUser.save();
+
+               return res
+                    .status(200)
+                    .cookie("user_session_A", newAccessToken, issueCookieOptions("access"))
+                    .cookie("user_session_R", newRefreshToken, issueCookieOptions("refresh"))
+                    .redirect(`${process.env.DEPLOYED_FRONTEND_URL}/home/${guestID}`);
+          } catch (error) {
+               if (error.name === "NotBeforeError") {
+                    throw new APIError(401, "Cannot continue at the moment", { error: "UNAUTHORISED_ACCESS" });
+               }
+               if (error.name === "JsonWebTokenError") {
+                    throw new APIError(401, "Cannot continue at the moment", { error: "UNAUTHORISED_ACCESS" });
+               }
+               if (error.name === "TokenExpiredError") {
+                    const refreshTokenVerification = await verifyGuestRefreshToken(refreshToken, decodedRefreshToken);
+                    if (refreshTokenVerification === "SERVER_ERROR") {
+                         throw new APIError(500, "Something went wrong, please try again later", {error: refreshTokenVerification})
+                    }
+                    if (
+                         refreshTokenVerification === "NOT_FOUND" ||
+                         refreshTokenVerification === "UNAUTHORISED_ACCESS" ||
+                         refreshTokenVerification.accountDeleted
+                    ) {
+                         return res
+                              .status((refreshTokenVerification === "NOT_FOUND" || refreshTokenVerification === "UNAUTHORISED_ACCESS") ? 401 : 200)
+                              .clearCookie("user_session_A")
+                              .clearCookie("user_session_R")
+                    }
+                    if (refreshTokenVerification.refreshTokenUpdated) {
+                         return res
+                              .status(200)
+                              .cookie("user_session_A", refreshTokenVerification.accessToken, issueCookieOptions("access"))
+                              .cookie("user_session_R", refreshTokenVerification.refreshToken, issueCookieOptions("refresh"))
+                              .redirect(`${process.env.DEPLOYED_FRONTEND_URL}/home/${decodedRefreshToken.guestID}`)
+                         
+                    }
+               }
                throw new APIError(500, "Something went wrong, please try again later", { error: "SERVER_ERROR" });
           }
      }
-
-     return res.status(500).json({
-          statusCode: 500,
-          message: "Cannot continue at the moment, please try again later",
-          success: false,
-          data: {
-               error: "SERVER_ERROR",
-          },
-     });
 });
 
 export { verifyGuestUser, verifyOAuthUser, verifyMagicLinkUser };

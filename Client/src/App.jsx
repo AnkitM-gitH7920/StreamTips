@@ -7,18 +7,25 @@ import TemplatesPage from "./Components/TemplatesPage";
 import TipPage from "./Components/TipPage";
 import Supporters from "./Components/Supporters";
 import SettingsPage from "./Components/SettingsPage";
+import Home from "./Components/Home";
 import PageNotFound from "./Components/PageNotFound";
 
 export default function App() {
-     return <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/login" element={<AuthLayout />} />
-          {/* <Route path="/signup" element={<AuthLayout signup />} />*/}
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/templates" element={<TemplatesPage />} />
-          <Route path="/tip/:username" element={<TipPage />} />
-          <Route path="/supporters" element={<Supporters />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="*" element={<PageNotFound />} />
-     </Routes>
+     return (
+          <Routes>
+               <Route path="/" element={<Landing />} />
+               <Route path="/home/:username" element={<Home />}></Route>
+               <Route path="/login" element={<AuthLayout />} />
+               <Route path="/dashboard" element={<Dashboard />} />
+               <Route path="/templates" element={<TemplatesPage />} />
+               <Route path="/tip/:username" element={<TipPage />} />
+               <Route path="/supporters" element={<Supporters />} />
+               <Route path="/settings" element={<SettingsPage />} />
+               <Route path="*" element={<PageNotFound />} />
+          </Routes>
+     );
 }
+
+// {
+//      /* <Route path="/signup" element={<AuthLayout signup />} />*/
+// }
