@@ -7,20 +7,20 @@ import TemplatesPage from "./Components/TemplatesPage";
 import TipPage from "./Components/TipPage";
 import Supporters from "./Components/Supporters";
 import SettingsPage from "./Components/SettingsPage";
-import Home from "./Components/Home";
 import PageNotFound from "./Components/PageNotFound";
+import CreatorPage from "./Components/CreatorPage";
 
 export default function App() {
      return (
           <Routes>
                <Route path="/" element={<Landing />} />
-               <Route path="/home/:username" element={<Home />}></Route>
+               <Route path="/home/:id" element={<CreatorPage />}></Route>
                <Route path="/login" element={<AuthLayout />} />
-               <Route path="/dashboard" element={<Dashboard />} />
-               <Route path="/templates" element={<TemplatesPage />} />
+               <Route path="/me" element={<Dashboard />} />
+               <Route path="/me/templates" element={<TemplatesPage />} />
                <Route path="/tip/:username" element={<TipPage />} />
-               <Route path="/supporters" element={<Supporters />} />
-               <Route path="/settings" element={<SettingsPage />} />
+               <Route path="/me/supporters" element={<Supporters />} />
+               <Route path="/me/settings" element={<SettingsPage />} />
                <Route path="*" element={<PageNotFound />} />
           </Routes>
      );
