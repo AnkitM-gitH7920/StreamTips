@@ -1,4 +1,8 @@
 import "dotenv/config";
+
+// import dns from "node:dns/promises";
+// dns.setServers(["8.8.8.8", "1.1.1.1"]);
+
 import app from "./app.js";
 import chalk from "chalk";
 import { connectToDB } from "./database/connectDB.js";

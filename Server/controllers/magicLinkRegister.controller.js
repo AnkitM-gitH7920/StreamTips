@@ -34,11 +34,11 @@ const consumeMagicToken = async function (email, token) {
           `,
           1,
           email,
-          token
+          token,
      );
 
      return result;
-}
+};
 
 const magicLinkMailSendController = asyncHandler(async (req, res, next) => {
      /*
@@ -54,11 +54,15 @@ const magicLinkMailSendController = asyncHandler(async (req, res, next) => {
      if (!emailValidation) throw new APIError(422, "Invalid email", { error: "UNPROCESSABLE_ENTITY" });
 
      const creationTimestamp = Math.floor(Date.now() / 1000);
-     const expiresAt = creationTimestamp + (60 * 10);
-     const token = await jwt.sign({
-          email: email,
-          generatedAt: creationTimestamp
-     }, process.env.MAGIC_LINK_SESSION_KEY, { expiresIn: "10m" });
+     const expiresAt = creationTimestamp + 60 * 10;
+     const token = await jwt.sign(
+          {
+               email: email,
+               generatedAt: creationTimestamp,
+          },
+          process.env.MAGIC_LINK_SESSION_KEY,
+          { expiresIn: "10m" },
+     );
 
      // Handle caching operations
      try {
@@ -67,22 +71,28 @@ const magicLinkMailSendController = asyncHandler(async (req, res, next) => {
                console.log(chalk.red(`Error Storing user in cache : ${email}`));
                throw new APIError(500, "Something went wrong, please try again later", { error: "SERVER_ERROR" });
           }
-
      } catch (redisErr) {
           console.log(redisErr);
           throw new APIError(500, "Something went wrong, please try again later", { error: "SERVER_ERROR" });
      }
 
      // Handle mailing service
-     try { await magicLinkMailer(email, "Your login email has arrived", token) }
-     catch (mailError) {
+     try {
+          await magicLinkMailer(email, "Your login email has arrived", token);
+     } catch (mailError) {
           console.log(mailError);
           await redis.del(token); //Invalidate recently stored user token
-          throw new APIError(500, "Something went wrong, please try again later", { error: "SERVER_ERROR" })
+          throw new APIError(500, "Something went wrong, please try again later", { error: "SERVER_ERROR" });
      }
 
-     return res.status(200).json(new APIResponse(200, `Please check you inbox ${email}`, { email: email, genAt: creationTimestamp, expAt: expiresAt }));
-})
+     return res.status(200).json(
+          new APIResponse(200, `Please check you inbox ${email}`, {
+               email: email,
+               genAt: creationTimestamp,
+               expAt: expiresAt,
+          }),
+     );
+});
 
 const magicLinkMailVerifyController = asyncHandler(async (req, res, next) => {
      const token = req.query.token;
@@ -90,8 +100,9 @@ const magicLinkMailVerifyController = asyncHandler(async (req, res, next) => {
 
      // Handle magic token verification
      let decodedToken;
-     try { decodedToken = jwt.verify(token, process.env.MAGIC_LINK_SESSION_KEY) }
-     catch (jwtError) {
+     try {
+          decodedToken = jwt.verify(token, process.env.MAGIC_LINK_SESSION_KEY);
+     } catch (jwtError) {
           if (jwtError.name === "TokenExpiredError") {
                const cacheUser = await redis.get(token);
                if (cacheUser) {
@@ -100,8 +111,10 @@ const magicLinkMailVerifyController = asyncHandler(async (req, res, next) => {
                }
                throw new APIError(401, "Login link has been expired, please relogin", { error: "UNAUTHORISED" });
           }
-          if (jwtError.name === "NotBeforeError") throw new APIError(401, "Cannot continue at the moment", { error: "UNAUTHORISED" });
-          if (jwtError.name === "JsonWebTokenError") throw new APIError(401, "Cannot continue at the moment", { error: "UNAUTHORISED" });
+          if (jwtError.name === "NotBeforeError")
+               throw new APIError(401, "Cannot continue at the moment", { error: "UNAUTHORISED" });
+          if (jwtError.name === "JsonWebTokenError")
+               throw new APIError(401, "Cannot continue at the moment", { error: "UNAUTHORISED" });
 
           console.log(jwtError);
           throw new APIError(500, "Something went wrong, please try again later", { error: "SERVER_ERROR" });
@@ -112,61 +125,41 @@ const magicLinkMailVerifyController = asyncHandler(async (req, res, next) => {
      try {
           storedUserEmail = await redis.get(token);
           if (!storedUserEmail) {
-               return res
-                    .status(401)
-                    .json({
-                         success: false,
-                         message: "Invalid or expired token provided, please relogin",
-                         statusCode: 401,
-                         data: { error: "UNAUTHORISED" }
-                    })
+               return res.status(401).json({
+                    success: false,
+                    message: "Invalid or expired token provided, please relogin",
+                    statusCode: 401,
+                    data: { error: "UNAUTHORISED" },
+               });
           }
 
           if (storedUserEmail !== decodedToken.email) {
                console.log(chalk.red(`Invalid token provided : ${decodedToken.email}`));
-               return res
-                    .status(401)
-                    .json({
-                         success: false,
-                         message: "Invalid token provided",
-                         statusCode: 401,
-                         data: { error: "UNAUTHORISED" }
-                    })
+               return res.status(401).json({
+                    success: false,
+                    message: "Invalid token provided",
+                    statusCode: 401,
+                    data: { error: "UNAUTHORISED" },
+               });
           }
 
           await redis.del(token); //Invalidate verified token
-
-          // const result = await consumeMagicToken(storedUserEmail, token);
-          // if (result === 0) {
-          //      return res
-          //           .status(401)
-          //           .json({
-          //                success: false,
-          //                message: "Invalid or expired token provided, please relogin",
-          //                statusCode: 401,
-          //                data: { error: "UNAUTHORISED" }
-          //           })
-          // }
-          // if (result === -1) {
-          //      return res
-          //           .status(401)
-          //           .json({
-          //                success: false,
-          //                message: "Invalid token provided",
-          //                statusCode: 401,
-          //                data: { error: "UNAUTHORISED" }
-          //           })
-          // }
-
      } catch (redisError) {
-          console.log(redisError);
+          console.log(`${chalk.redBright(`[${redisError.name}]`)}  ${chalk.blue(redisError.message)}[${decodedToken.email}]`);
           throw new APIError(500, "Something went wrong, please try again later", { error: "SERVER_ERROR" });
      }
 
      // After verification :- Store user in main db
-     const accessToken = await generateAccessToken("magicLink", { email: storedUserEmail }, "15d");
-     const refreshToken = await generateRefreshToken("magicLink", { email: storedUserEmail }, "15d");
-     if (!accessToken || !refreshToken) throw new APIError(500, "Something went wrong, please try again later", { error: "SERVER_ERROR" });
+     const accessToken = await generateAccessToken(
+          { email: storedUserEmail, accountCreatedAt: decodedToken.generatedAt, loginType: "magicLink" },
+          "15d",
+     );
+     const refreshToken = await generateRefreshToken(
+          { email: storedUserEmail, accountCreatedAt: decodedToken.generatedAt, loginType: "magicLink" },
+          "15d",
+     );
+     if (!accessToken || !refreshToken)
+          throw new APIError(500, "Something went wrong, please try again later", { error: "SERVER_ERROR" });
 
      let storeUser;
      try {
@@ -176,8 +169,9 @@ const magicLinkMailVerifyController = asyncHandler(async (req, res, next) => {
                fullName: undefined,
                isLoggedOut: false,
                isVerified: true,
+               loggedInOn: decodedToken.generatedAt,
                loginType: "magicLink",
-               refreshToken: refreshToken
+               refreshToken: refreshToken,
           };
 
           storeUser = await RegisteredUsers.create(dbData);
@@ -185,22 +179,25 @@ const magicLinkMailVerifyController = asyncHandler(async (req, res, next) => {
                console.log(chalk.red(`Cannot create user in db : ${storedUserEmail}`));
                throw new APIError(500, "Something went wrong, please try again later", { error: "SERVER_ERROR" });
           }
-
      } catch (dbError) {
           console.log(dbError);
+          console.log(`${chalk.red(`[${dbError.name}]`)}  ${chalk.blue(dbError.message)}${decodedToken.email}`);
           throw new APIError(500, "Something went wrong, please try again later", { error: "SERVER_ERROR" });
      }
-
-     // Start by creating middleware
 
      const { email, fullName, loggedInOn, contactNumber, loginType } = storeUser;
      return res
           .status(200)
-          .cookie("accessToken", accessToken, issueCookieOptions("access"))
-          .cookie("refreshToken", refreshToken, issueCookieOptions("refresh"))
-          .json(new APIResponse(200, "User logged in successfully", { email, fullName, loggedInOn, contactNumber, loginType }))
-})
-export {
-     magicLinkMailSendController,
-     magicLinkMailVerifyController
-}
+          .cookie("user_session_A", accessToken, issueCookieOptions("access"))
+          .cookie("user_session_B", refreshToken, issueCookieOptions("refresh"))
+          .json(
+               new APIResponse(200, "User logged in successfully", {
+                    email,
+                    fullName,
+                    loggedInOn,
+                    contactNumber,
+                    loginType,
+               }),
+          );
+});
+export { magicLinkMailSendController, magicLinkMailVerifyController };

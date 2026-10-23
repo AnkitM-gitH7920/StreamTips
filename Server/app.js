@@ -19,9 +19,11 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json({ limit: "10kb" }));
 
 // Routes imports
+import securedRouter from "./routes/secured.routes.js";
 import authRouter from "./routes/Authentication.routes.js";
 import googleOAuthRouter from "./routes/googleOAuth.routes.js";
 
+app.use("/v1/s", securedRouter);
 app.use("/v1/auth", authRouter);
 app.use("/v1/auth/google", googleOAuthRouter);
 
