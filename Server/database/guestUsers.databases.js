@@ -17,13 +17,7 @@ const guestUserSchema = new mongoose.Schema({
           required: false,
           default: null
      },
-     refreshToken: { type: String },
-     expiresAt: {
-          type: Date,
-          default: () => new Date(Date.now() + 15 * 24 * 60 * 60 * 1000)
-
-     }
-
+     refreshToken: { type: String }
 }, { timestamps: true });
 
 guestUserSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });

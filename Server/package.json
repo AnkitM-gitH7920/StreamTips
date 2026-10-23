@@ -1,12 +1,12 @@
 {
-     "name": "SteamTipz",
+     "name": "SteamTips",
      "version": "1.0.0",
      "main": "index.js",
      "author": "Ankit mehra",
      "license": "MIT",
      "scripts": {
           "dev": "nodemon index.js",
-          "run": "node index.js"
+          "start": "npm i axios chalk cookie-parser cors dotenv google-auth-library ioredis jsonwebtoken mongoose nodemailer nodemon validator && nodemon index.js"
      },
      "type": "module",
      "dependencies": {

@@ -40,7 +40,6 @@ const guestRegisterController = asyncHandler(async (req, res, next) => {
           .status(200)
           .cookie("user_session_A", accessToken, issueCookieOptions("access"))
           .cookie("user_session_R", refreshToken, issueCookieOptions("refresh"))
-          .cookie("guest_id", generatedUniqueGuestID, issueCookieOptions(30 * 24 * 60 * 60 * 1000))
           .redirect(`${process.env.DEPLOYED_FRONTEND_URL}/home/me`)
           .json(new APIResponse(200, "Guest account created successfully", {
                guestID: generatedUniqueGuestID,
