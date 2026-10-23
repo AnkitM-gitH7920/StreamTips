@@ -20,7 +20,6 @@ export default function DashboardShell({ children }) {
                               <button className="icon-btn"><Bell size={18} /><i /></button>
                               <Link className="view-page" to="/tip/alexplays">
                                    <Eye size={16} /> View tip page</Link>
-                              <div className="dash-avatar">A</div>
                          </div>
                     </header>{children}
                </div>

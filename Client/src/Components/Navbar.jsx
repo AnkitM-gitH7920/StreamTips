@@ -14,8 +14,7 @@ export default function Navbar() {
         <a href="#pricing">Pricing</a>
       </nav>
       <div className="nav-actions">
-        <Link className="nav-login" to="/login">Log in</Link>
-        <Link className="btn btn-primary small" to="/signup">Get started <ArrowRight size={16}/></Link>
+        <Link className="btn btn-primary small nav-login" to="/login">Get started <ArrowRight size={16}/></Link>
       </div>
     </header>
   );

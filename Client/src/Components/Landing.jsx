@@ -18,7 +18,7 @@ export default function Landing() {
             <h1>Turn every tip<br/><em>into a moment.</em></h1>
             <p className="hero-text">Beautiful overlays, interactive alerts and unforgettable tip experiences — all in one place for creators.</p>
             <div className="hero-actions">
-              <Link className="btn btn-primary" to="/signup">Start creating <ArrowRight size={18}/></Link>
+              <Link className="btn btn-primary" to="/login">Start creating <ArrowRight size={18}/></Link>
               <a className="btn btn-ghost" href="#templates"><Play size={16} fill="currentColor"/> Explore templates</a>
             </div>
             <div className="hero-proof"><div className="avatars"><span>R</span><span>A</span><span>M</span><span>+</span></div><span>Trusted by <b>12,000+</b> creators</span></div>
@@ -60,7 +60,7 @@ export default function Landing() {
         </section>
 
         <section className="section templates-section" id="templates">
-          <div className="section-heading row"><div><div className="eyebrow">TEMPLATE LIBRARY</div><h2>Your stream.<br/><em>Your signature.</em></h2></div><Link className="text-link" to="/templates">View all templates <ArrowRight size={16}/></Link></div>
+          <div className="section-heading row"><div><div className="eyebrow">TEMPLATE LIBRARY</div><h2>Your stream.<br/><em>Your signature.</em></h2></div><Link className="text-link" to="/template-library">View all templates <ArrowRight size={16}/></Link></div>
           <div className="template-grid">{templates.slice(0,4).map(t=><TemplateCard key={t.id} template={t}/>)}</div>
         </section>
 

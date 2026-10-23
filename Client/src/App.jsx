@@ -13,15 +13,19 @@ import CreatorPage from "./Components/CreatorPage";
 export default function App() {
      return (
           <Routes>
+               {/* Globally accessible routes*/}
                <Route path="/" element={<Landing />} />
                <Route path="/home/:id" element={<CreatorPage />}></Route>
                <Route path="/login" element={<AuthLayout />} />
-               <Route path="/me" element={<Dashboard />} />
-               <Route path="/me/templates" element={<TemplatesPage />} />
                <Route path="/tip/:username" element={<TipPage />} />
-               <Route path="/me/supporters" element={<Supporters />} />
-               <Route path="/me/settings" element={<SettingsPage />} />
                <Route path="*" element={<PageNotFound />} />
+
+               {/* Creator accessible routes*/}
+               <Route path="/me" element={<Dashboard />} />
+               <Route path="/me/settings" element={<SettingsPage />} />
+               <Route path="/me/templates" element={<TemplatesPage />} />
+               <Route path="/me/supporters" element={<Supporters />} />
+               {/* <Route path="/me/settings/profile" element={<ManageProfile />}></Route>*/}
           </Routes>
      );
 }
