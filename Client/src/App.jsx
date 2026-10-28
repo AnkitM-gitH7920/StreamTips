@@ -9,6 +9,7 @@ import Supporters from "./Components/Supporters";
 import SettingsPage from "./Components/SettingsPage";
 import PageNotFound from "./Components/PageNotFound";
 import CreatorPage from "./Components/CreatorPage";
+import CreatorSetupPage from "./Components/CreatorSetupPage";
 
 export default function App() {
      return (
@@ -25,6 +26,7 @@ export default function App() {
                <Route path="/me/settings" element={<SettingsPage />} />
                <Route path="/me/templates" element={<TemplatesPage />} />
                <Route path="/me/supporters" element={<Supporters />} />
+               <Route path="/me/setup" element={<CreatorSetupPage />}></Route>
                {/* <Route path="/me/settings/profile" element={<ManageProfile />}></Route>*/}
           </Routes>
      );
