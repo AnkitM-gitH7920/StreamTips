@@ -1,0 +1,99 @@
+.template-preview {
+     height: 210px;
+     border-radius: 12px;
+     overflow: hidden;
+     position: relative;
+     background: #112b24
+}
+
+.tone-emerald {
+     background: radial-gradient(circle at 70% 20%, #2b725e, #0d3026 45%, #071814)
+}
+
+.tone-gold {
+     background: radial-gradient(circle at 50% 20%, #70552e, #1e241d 50%, #0b1411)
+}
+
+.tone-neon {
+     background: radial-gradient(circle at 60% 30%, #6e367e, #17264b 42%, #080d18)
+}
+
+.tone-soft {
+     background: linear-gradient(145deg, #bca78d, #4b665c 55%, #1a302a)
+}
+
+.tone-pixel {
+     background: repeating-linear-gradient(45deg, #133d32 0 12px, #1d5948 12px 24px)
+}
+
+.tone-anime {
+     background: radial-gradient(circle at 30% 20%, #a95f77, #263c50 45%, #101a22)
+}
+
+.preview-lines {
+     position: absolute;
+     left: 14px;
+     right: 14px;
+     bottom: 14px;
+     height: 25px;
+     display: flex;
+     align-items: end;
+     gap: 4px
+}
+
+.preview-lines span {
+     height: 8px;
+     width: 35%;
+     background: rgba(248, 231, 201, .35);
+     border-radius: 2px
+}
+
+.preview-lines span:nth-child(2) {
+     width: 20%;
+     height: 13px
+}
+
+.preview-alert {
+     position: absolute;
+     left: 50%;
+     top: 50%;
+     transform: translate(-50%, -50%);
+     width: 175px;
+     padding: 9px;
+     border: 1px solid rgba(248, 231, 201, .25);
+     background: rgba(4, 16, 12, .8);
+     border-radius: 9px;
+     display: flex;
+     gap: 7px;
+     color: #fff;
+     align-items: center
+}
+
+.preview-alert svg {
+     color: var(--champ)
+}
+
+.preview-alert b,
+.preview-alert strong {
+     display: block
+}
+
+.preview-alert b {
+     font-size: 6px;
+     color: #aabdb4;
+     letter-spacing: .8px
+}
+
+.preview-alert strong {
+     font-size: 9px;
+     margin-top: 2px
+}
+
+.preview-corner {
+     position: absolute;
+     right: 10px;
+     bottom: 10px;
+     font-size: 6px;
+     letter-spacing: 1px;
+     color: rgba(255, 255, 255, .5)
+}

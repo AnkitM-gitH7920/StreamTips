@@ -1,0 +1,162 @@
+.metric-grid {
+     display: grid;
+     grid-template-columns: repeat(4, 1fr);
+     gap: 13px
+}
+
+.metric {
+     padding: 19px
+}
+
+.metric-top {
+     display: flex;
+     justify-content: space-between;
+     color: var(--muted);
+     font-size: 11px
+}
+
+.metric-top div {
+     width: 31px;
+     height: 31px;
+     border-radius: 8px;
+     background: #edf3ef;
+     color: var(--ink);
+     display: grid;
+     place-items: center
+}
+
+.metric>strong {
+     display: block;
+     font: 700 26px Manrope;
+     margin: 17px 0 3px;
+     color: var(--ink2)
+}
+
+.metric>small {
+     font-size: 10px;
+     color: var(--muted)
+}
+
+.dash-columns {
+     display: grid;
+     grid-template-columns: 1.4fr 1fr;
+     gap: 13px;
+     margin-top: 13px
+}
+
+.tip-list {
+     display: grid
+}
+
+.tip-row {
+     display: grid;
+     grid-template-columns: 35px 1fr 1fr auto;
+     align-items: center;
+     gap: 10px;
+     border-top: 1px solid #edf0ed;
+     padding: 11px 0
+}
+
+.tip-who b {
+     font-size: 11px
+}
+
+.tip-who span {
+     font-size: 9px;
+     color: var(--ink);
+     font-weight: 700;
+     margin-top: 2px
+}
+
+.tip-row p {
+     font-size: 10px;
+     color: #78857f;
+     margin: 0
+}
+
+.tip-row>small {
+     font-size: 9px;
+     color: #9aa59f
+}
+
+.supporter-list {
+     display: grid
+}
+
+.overlay-panel {
+     margin-top: 13px
+}
+
+.overlay-panel .panel-heading>div:last-child {
+     display: flex;
+     gap: 7px
+}
+
+.overlay-demo {
+     background: #f1f4f1;
+     border-radius: 10px;
+     padding: 18px
+}
+
+.overlay-demo .template-preview {
+     height: 260px
+}
+
+.overlay-stats {
+     display: flex;
+     justify-content: space-between;
+     margin-top: 9px;
+     font-size: 9px;
+     color: var(--muted)
+}
+
+.overlay-stats span {
+     color: #3c8062
+}
+
+.overlay-stats i {
+     display: inline-block;
+     width: 6px;
+     height: 6px;
+     background: #5b9b79;
+     border-radius: 50%;
+     margin-right: 5px
+}
+
+@media(max-width:1000px) {
+     .metric-grid {
+          grid-template-columns: repeat(2, 1fr)
+     }
+
+     .dash-columns {
+          grid-template-columns: 1fr
+     }
+}
+
+@media(max-width:720px) {
+     .metric-grid {
+          grid-template-columns: 1fr 1fr
+     }
+
+     .metric {
+          padding: 14px
+     }
+
+     .metric>strong {
+          font-size: 21px
+     }
+
+     .tip-row {
+          grid-template-columns: 35px 1fr auto
+     }
+
+     .tip-row p {
+          display: none
+     }
+}
+
+@media(max-width:430px) {
+     .metric-top span {
+          font-size: 9px
+     }
+}

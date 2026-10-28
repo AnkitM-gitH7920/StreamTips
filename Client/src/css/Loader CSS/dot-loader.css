@@ -1,0 +1,43 @@
+.dotloader-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 20px;
+}
+
+.dotloader-container span {
+  width: 5px;
+  height: 5px;
+  background: white;
+  border-radius: 50%;
+  animation: dotJump 0.8s infinite ease-in-out;
+}
+
+.dotloader-container span:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.dotloader-container span:nth-child(2) {
+  animation-delay: 0.12s;
+}
+
+.dotloader-container span:nth-child(3) {
+  animation-delay: 0.24s;
+}
+
+.dotloader-container span:nth-child(4) {
+  animation-delay: 0.36s;
+}
+
+@keyframes dotJump {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+  }
+
+  30% {
+    transform: translateY(-3px);
+  }
+}

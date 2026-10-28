@@ -1,0 +1,103 @@
+.app-shell {
+     min-height: 100vh;
+     background: #f7f8f5;
+     display: flex
+}
+
+.dashboard-main {
+     flex: 1;
+     min-width: 0
+}
+
+.dash-header {
+     height: 68px;
+     background: #fff;
+     border-bottom: 1px solid var(--line);
+     display: flex;
+     align-items: center;
+     justify-content: space-between;
+     padding: 0 35px
+}
+
+.search-box {
+     display: flex;
+     align-items: center;
+     gap: 8px;
+     color: #89958f
+}
+
+.search-box input {
+     border: 0;
+     outline: 0;
+     background: transparent;
+     width: 220px;
+     font-size: 12px
+}
+
+.header-actions {
+     display: flex;
+     align-items: center;
+     gap: 13px
+}
+
+.header-actions .icon-btn {
+     position: relative
+}
+
+.header-actions .icon-btn i {
+     position: absolute;
+     right: 6px;
+     top: 6px;
+     width: 5px;
+     height: 5px;
+     background: #bd6a42;
+     border-radius: 50%
+}
+
+.view-page {
+     font-size: 11px;
+     color: var(--ink);
+     font-weight: 700;
+     border: 1px solid var(--line);
+     padding: 9px 11px;
+     border-radius: 8px;
+     display: flex;
+     gap: 6px;
+     align-items: center
+}
+
+.mobile-menu {
+     display: none
+}
+
+@media(max-width:720px) {
+     .app-shell {
+          display: block
+     }
+
+     .dash-header {
+          padding: 0 18px
+     }
+
+     .mobile-menu {
+          display: block
+     }
+
+     .search-box {
+          display: none
+     }
+
+     .header-actions .view-page {
+          display: none
+     }
+}
+
+@media(max-width:430px) {
+     .dash-header {
+          height: 60px
+     }
+
+     .header-actions {
+          gap: 7px
+     }
+}
