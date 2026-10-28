@@ -2,12 +2,11 @@ import React, { useState } from "react";
 import "../css/creator-setup-page.css";
 
 const fields = [
+     { name: "about", label: "About", placeholder: "Write something about yourself" },
      { name: "category", label: "Creator category", placeholder: "e.g. Design, Gaming, Education" },
-     { name: "company", label: "Company or community", placeholder: "Your company, brand, or community" },
-     { name: "role", label: "Your role", placeholder: "e.g. Designer, Developer, Educator" },
-     { name: "linkedin", label: "LinkedIn profile", placeholder: "https://linkedin.com/in/yourname", type: "url" },
-     { name: "twitter", label: "X / Twitter profile", placeholder: "https://x.com/yourname", type: "url" },
-     { name: "website", label: "Portfolio / website", placeholder: "https://yourwebsite.com", type: "url" },
+     // { name: "game-category", label: "Games ", placeholder: "e.g. Designer, Developer, Educator" },
+     // { name: "instagram", label: "Instagram Profile", placeholder: "https://instagram.com/username", type: "url" },
+     { name: "website", label: "Personal website URL", placeholder: "https://yourwebsite.com", type: "url" },
 ];
 
 export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip, isSaving = false }) {
@@ -87,14 +86,17 @@ export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip,
                                    <small>{profile.username ? `@${profile.username}` : "Almost ready to go"}</small>
                               </div>
                          </div>
-                         <p className="st-setup-nav-heading">WORKSPACE</p>
+                         {/* <p className="st-setup-nav-heading">WORKSPACE</p>*/}
                          <nav className="st-setup-nav" aria-label="Setup navigation">
-                              <button onClick={() => setActiveTab("creator")} type="button" className={activeTab === "creator" ? "active" : ""}>
+                              <div className="st-setup-pfp">
+                                   <img src="" alt="" />
+                              </div>
+                              {/* <button onClick={() => setActiveTab("creator")} type="button" className={activeTab === "creator" ? "active" : ""}>
                                    <span>◉</span> Creator profile <i />
                               </button>
                               <button onClick={() => setActiveTab("personal")} type="button" className={activeTab === "personal" ? "active" : ""} >
                                    <span>▤</span> Personal information
-                              </button>
+                              </button>*/}
                               {/* <button type="button" onClick={() => setActiveTab("security")}>
                                    <span>◇</span> Login &amp; security
                               </button>*/}
@@ -129,7 +131,7 @@ export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip,
                               </div>
                          </div>
 
-                         <div className="st-setup-tabs" role="tablist" aria-label="Profile settings">
+                         {/* <div className="st-setup-tabs" role="tablist" aria-label="Profile settings">
                               <button
                                    type="button"
                                    role="tab"
@@ -147,8 +149,8 @@ export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip,
                                    onClick={() => setActiveTab("personal")}
                               >
                                    Personal info
-                              </button>
-                              {/* <button
+                              </button>*/}
+                         {/* <button
                                    type="button"
                                    role="tab"
                                    aria-selected={activeTab === "security"}
@@ -157,39 +159,37 @@ export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip,
                               >
                                    Login &amp; security
                               </button>*/}
-                         </div>
+                         {/* </div>*/}
 
                          <form className="st-setup-form" onSubmit={submit}>
-                              {activeTab === "creator" ? (
-                                   <>
-                                        <div className="st-setup-section-heading">
-                                             <div>
-                                                  <h2>Creator details</h2>
-                                                  <p>These details help shape your public StreamTips page.</p>
-                                             </div>
-                                             <span>PUBLIC PROFILE</span>
+                              {/* <div className="st-setup-section-heading">
+                                   <div>
+                                        <h2>Creator details</h2>
+                                        <p>These details help shape your public StreamTips page.</p>
+                                   </div>
+                                   <span>PUBLIC PROFILE</span>
+                              </div>*/}
+                              <div className="st-setup-two-col">
+                                   {field("displayName", "Display name", "How should supporters know you?")}
+                                   {field("username", "Username", "Choose a unique username")}
+                              </div>
+                              <div className="st-setup-divider" />
+                              <div className="st-setup-rows">
+                                   {fields.map(({ name, label, placeholder, type }) => (
+                                        <div className="st-setup-row" key={name}>
+                                             <label htmlFor={name}>{label}</label>
+                                             <input
+                                                  id={name}
+                                                  name={name}
+                                                  type={type || "text"}
+                                                  value={profile[name] || ""}
+                                                  onChange={update}
+                                                  placeholder={placeholder}
+                                             />
                                         </div>
-                                        <div className="st-setup-two-col">
-                                             {field("displayName", "Display name", "How should supporters know you?")}
-                                             {field("username", "Username", "Choose a unique username")}
-                                        </div>
-                                        <div className="st-setup-divider" />
-                                        <div className="st-setup-rows">
-                                             {fields.map(({ name, label, placeholder, type }) => (
-                                                  <div className="st-setup-row" key={name}>
-                                                       <label htmlFor={name}>{label}</label>
-                                                       <input
-                                                            id={name}
-                                                            name={name}
-                                                            type={type || "text"}
-                                                            value={profile[name] || ""}
-                                                            onChange={update}
-                                                            placeholder={placeholder}
-                                                       />
-                                                  </div>
-                                             ))}
-                                        </div>
-                                        {/* <div className="st-setup-affiliate">
+                                   ))}
+                              </div>
+                              {/* <div className="st-setup-affiliate">
                                              <span className="st-setup-spark">✦</span>
                                              <div>
                                                   <strong>Affiliate partner (optional)</strong>
@@ -207,14 +207,13 @@ export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip,
                                              </div>
                                              <small>OPTIONAL</small>
                                         </div>*/}
-                                   </>
-                              ) : (
-                                   <div className="st-setup-placeholder">
-                                        <span>{activeTab === "personal" ? "✧" : "◇"}</span>
-                                        {/* <h2>
+
+                              {/* <div className="st-setup-placeholder">
+                                        <span>{activeTab === "personal" ? "✧" : "◇"}</span>*/}
+                              {/* <h2>
                                              {activeTab === "personal" ? "Personal information" : "Login & security"}
                                         </h2>*/}
-                                        <p>
+                              {/* <p>
                                              {activeTab === "personal"
                                                   ? "Add personal details in the next step. Your public creator profile only displays information you choose to share."
                                                   : "Your sign-in method and security settings can be managed here. Authentication settings are not editable in this profile setup form."}
@@ -222,14 +221,9 @@ export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip,
                                         <button type="button" onClick={() => setActiveTab("creator")}>
                                              Back to creator profile →
                                         </button>
-                                   </div>
-                              )}
+                                   </div>*/}
 
-                              {message && (
-                                   <div className="st-setup-message" role="status">
-                                        {message}
-                                   </div>
-                              )}
+                              {/* Create a pop up toast for status*/}
                               <footer className="st-setup-footer">
                                    <p>
                                         <span>♧</span> Your information is protected and kept secure.
@@ -241,7 +235,7 @@ export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip,
                                              </button>
                                         )}
                                         <button type="submit" className="st-setup-submit" disabled={isSaving}>
-                                             {isSaving ? "Saving..." : "Save & continue"} {!isSaving && <b>→</b>}
+                                             {isSaving ? "Saving..." : "Save & continue"} {!isSaving && <b>&gt;</b>}
                                         </button>
                                    </div>
                               </footer>
