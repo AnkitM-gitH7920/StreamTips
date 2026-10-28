@@ -61,7 +61,6 @@ async function verifyRefreshToken(refreshToken, tokenObject) {
 }
 
 const authorizeUser = asyncHandler(async (req, res, next) => {
-     console.log("Running")
      const accessToken = req.cookies.user_session_A;
      const refreshToken = req.cookies.user_session_R;
      if (!accessToken || !refreshToken) return next();

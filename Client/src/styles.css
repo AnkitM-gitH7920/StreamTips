@@ -16,9 +16,22 @@
 }
 
 * {
-     box-sizing: border-box
+     box-sizing: border-box;
+     margin: 0;
+     padding: 0;
+     scroll-behavior: smooth;
+     transition: all cubic-bezier(0.4, 0.0, 0.2, 1) 0.4s
 }
-
+*::-webkit-scrollbar{
+     width: 4px;
+     background-color: transparent;
+     border-radius: 100px;
+     
+}
+*::-webkit-scrollbar-thumb{
+     background-color: var(--ink);
+     border-radius: 100px;
+}
 html {
      scroll-behavior: smooth
 }
