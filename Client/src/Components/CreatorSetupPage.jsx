@@ -1,12 +1,52 @@
 import React, { useState } from "react";
 import "../css/creator-setup-page.css";
 
+// To be added field
+// * Display name
+// * Username
+// * email
+// * about
+// * Creator category
+// * Website URL
+// * Streaming platforms
 const fields = [
-     { name: "about", label: "About", placeholder: "Write something about yourself" },
-     { name: "category", label: "Creator category", placeholder: "e.g. Design, Gaming, Education" },
-     // { name: "game-category", label: "Games ", placeholder: "e.g. Designer, Developer, Educator" },
-     // { name: "instagram", label: "Instagram Profile", placeholder: "https://instagram.com/username", type: "url" },
-     { name: "website", label: "Personal website URL", placeholder: "https://yourwebsite.com", type: "url" },
+     {
+          name: "displayName",
+          label: "Display Name",
+          placeholder: "How should supporters know you?",
+          fieldOptionsObj: {
+               fieldType: "planetext",
+               selectionOptions: [],
+          },
+     },
+     {
+          name: "about",
+          label: "About",
+          placeholder: "Write something about yourself",
+          fieldOptionsObj: {
+               fieldType: "planetext",
+               selectionOptions: [],
+          },
+     },
+     {
+          name: "category",
+          label: "Creator category",
+          placeholder: "e.g. Design, Gaming, Education",
+          fieldOptionsObj: {
+               fieldType: "planetext",
+               selectionOptions: [],
+          },
+     },
+     {
+          name: "website",
+          label: "Personal website URL",
+          placeholder: "https://yourwebsite.com",
+          fieldOptionsObj: {
+               fieldType: "planetext",
+               selectionOptions: [],
+          },
+          type: "url",
+     },
 ];
 
 export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip, isSaving = false }) {
@@ -44,19 +84,28 @@ export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip,
           }
      };
 
-     const field = (name, label, placeholder, type = "text") => (
-          <div className="st-setup-field" key={name}>
-               <label htmlFor={name}>{label}</label>
-               <input
-                    id={name}
-                    name={name}
-                    type={type}
-                    value={profile[name] || ""}
-                    onChange={update}
-                    placeholder={placeholder}
-               />
-          </div>
-     );
+     const field = (name, label, placeholder, fieldType, type = "text") => {
+          if (fieldType === "planetext") {
+               return (
+                    <div className="st-setup-field" key={name}>
+                         <label htmlFor={name}>{label}</label>
+                         <input
+                              id={name}
+                              name={name}
+                              type={type}
+                              value={profile[name] || ""}
+                              onChange={update}
+                              placeholder={placeholder}
+                         />
+                    </div>
+               );
+          } else if (fieldType === "selection") {
+               return (
+                    // Create a field with Ui blended selection dropdown
+                    <input type="password" />
+               );
+          }
+     };
 
      return (
           <main className="st-setup-page">
@@ -66,9 +115,6 @@ export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip,
                          <span>StreamTips</span>
                     </a>
                     <div className="st-setup-top-actions">
-                         {/* <span className="st-setup-save-state">
-                              <i /> Profile setup
-                         </span>*/}
                          <span className="st-setup-avatar">
                               {profile.displayName?.trim()?.[0]?.toUpperCase() || "C"}
                          </span>
@@ -86,20 +132,10 @@ export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip,
                                    <small>{profile.username ? `@${profile.username}` : "Almost ready to go"}</small>
                               </div>
                          </div>
-                         {/* <p className="st-setup-nav-heading">WORKSPACE</p>*/}
                          <nav className="st-setup-nav" aria-label="Setup navigation">
                               <div className="st-setup-pfp">
                                    <img src="" alt="" />
                               </div>
-                              {/* <button onClick={() => setActiveTab("creator")} type="button" className={activeTab === "creator" ? "active" : ""}>
-                                   <span>◉</span> Creator profile <i />
-                              </button>
-                              <button onClick={() => setActiveTab("personal")} type="button" className={activeTab === "personal" ? "active" : ""} >
-                                   <span>▤</span> Personal information
-                              </button>*/}
-                              {/* <button type="button" onClick={() => setActiveTab("security")}>
-                                   <span>◇</span> Login &amp; security
-                              </button>*/}
                          </nav>
                          <div className="st-setup-help">
                               <span>?</span>
@@ -130,64 +166,34 @@ export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip,
                                    </div>
                               </div>
                          </div>
-
-                         {/* <div className="st-setup-tabs" role="tablist" aria-label="Profile settings">
-                              <button
-                                   type="button"
-                                   role="tab"
-                                   aria-selected={activeTab === "creator"}
-                                   className={activeTab === "creator" ? "active" : ""}
-                                   onClick={() => setActiveTab("creator")}
-                              >
-                                   Creator profile
-                              </button>
-                              <button
-                                   type="button"
-                                   role="tab"
-                                   aria-selected={activeTab === "personal"}
-                                   className={activeTab === "personal" ? "active" : ""}
-                                   onClick={() => setActiveTab("personal")}
-                              >
-                                   Personal info
-                              </button>*/}
-                         {/* <button
-                                   type="button"
-                                   role="tab"
-                                   aria-selected={activeTab === "security"}
-                                   className={activeTab === "security" ? "active" : ""}
-                                   onClick={() => setActiveTab("security")}
-                              >
-                                   Login &amp; security
-                              </button>*/}
-                         {/* </div>*/}
-
                          <form className="st-setup-form" onSubmit={submit}>
-                              {/* <div className="st-setup-section-heading">
-                                   <div>
-                                        <h2>Creator details</h2>
-                                        <p>These details help shape your public StreamTips page.</p>
-                                   </div>
-                                   <span>PUBLIC PROFILE</span>
-                              </div>*/}
                               <div className="st-setup-two-col">
-                                   {field("displayName", "Display name", "How should supporters know you?")}
-                                   {field("username", "Username", "Choose a unique username")}
+                                   {field("email", "Email", "e.g. example@email.com", "planetext")}
+                                   {field("username", "Username", "Choose a unique username", "planetext")}
                               </div>
                               <div className="st-setup-divider" />
                               <div className="st-setup-rows">
-                                   {fields.map(({ name, label, placeholder, type }) => (
-                                        <div className="st-setup-row" key={name}>
-                                             <label htmlFor={name}>{label}</label>
-                                             <input
-                                                  id={name}
-                                                  name={name}
-                                                  type={type || "text"}
-                                                  value={profile[name] || ""}
-                                                  onChange={update}
-                                                  placeholder={placeholder}
-                                             />
-                                        </div>
-                                   ))}
+                                   {fields.map(({ name, label, placeholder, fieldOptionsObj, type }) => {
+                                        console.log(fieldOptionsObj);
+                                        const { fieldType, selectionOptions } = fieldOptionsObj;
+                                        if (fieldType === "planetext") {
+                                             return (
+                                                  <div className="st-setup-row" key={name}>
+                                                       <label htmlFor={name}>{label}</label>
+                                                       <input
+                                                            id={name}
+                                                            name={name}
+                                                            type={type || "text"}
+                                                            value={profile[name] || ""}
+                                                            onChange={update}
+                                                            placeholder={placeholder}
+                                                       />
+                                                  </div>
+                                             );
+                                        } else if (fieldType === "selection") {
+                                             return <div>Nothing</div>;
+                                        }
+                                   })}
                               </div>
                               {/* <div className="st-setup-affiliate">
                                              <span className="st-setup-spark">✦</span>
