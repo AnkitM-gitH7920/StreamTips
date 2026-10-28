@@ -19,19 +19,18 @@ export default function Landing() {
                console.log(response)
                return response;
           },
+          refetchOnWindowFocus: false,
           retryDelay: 500,
           retry: 3,
      });
 
-     if (isPending) {
-          return (
-               <div>Loading...</div>
-          )
-     }
+     // Create a loading animation <-- TODO
+     // if (isPending) {
+     //      return (
+     //           <div>Loading...</div>
+     //      )
+     // }
      console.log(error)
-     if (axiosData.data.redirectTo) {
-          navigate(axiosData.data.redirectTo)
-     }
      if (isFetched) {
           return (
                <div className="site">

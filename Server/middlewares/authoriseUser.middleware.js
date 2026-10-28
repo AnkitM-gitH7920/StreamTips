@@ -60,7 +60,8 @@ async function verifyRefreshToken(refreshToken, tokenObject) {
      }
 }
 
-const authenticateUser = asyncHandler(async (req, res, next) => {
+const authorizeUser = asyncHandler(async (req, res, next) => {
+     console.log("Running")
      const accessToken = req.cookies.user_session_A;
      const refreshToken = req.cookies.user_session_R;
      if (!accessToken || !refreshToken) return next();
@@ -152,4 +153,4 @@ const authenticateUser = asyncHandler(async (req, res, next) => {
      }
 });
 
-export { authenticateUser };
+export { authorizeUser };

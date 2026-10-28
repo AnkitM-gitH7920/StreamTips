@@ -8,7 +8,7 @@ import { magicLinkMailSendController, magicLinkMailVerifyController } from "../c
 //Middleware imports
 import { verifyMagicLinkUser } from "../middlewares/Reloginhandler/magicLinkReloginHandler.js";
 import { verifyGuestUser } from "../middlewares/Reloginhandler/guestReloginHandler.js";
-import { authenticateUser } from "../middlewares/authoriseUser.middleware.js";
+import { authorizeUser } from "../middlewares/authoriseUser.middleware.js";
 
 const authRouter = express.Router();
 
@@ -18,6 +18,6 @@ authRouter.route("/magic-link/send").post(magicLinkMailSendController);
 authRouter.route("/magic-link/verify").get(verifyMagicLinkUser, magicLinkMailVerifyController);
 
 // Continue as Guest
-authRouter.route("/guest").get(authenticateUser, guestRegisterController);
+authRouter.route("/guest").get(authorizeUser, guestRegisterController);
 
 export default authRouter;

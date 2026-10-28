@@ -17,6 +17,10 @@ const guestUserSchema = new mongoose.Schema({
           required: false,
           default: null
      },
+     isIdentified: {
+          type: Boolean,
+          default: false
+     },
      refreshToken: { type: String }
 }, { timestamps: true });
 

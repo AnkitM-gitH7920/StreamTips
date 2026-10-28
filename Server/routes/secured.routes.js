@@ -3,11 +3,11 @@ import express from "express";
 import { provideCreatorData } from "../controllers/provideCreatorData.controller.js";
 
 // Middlware imports
-import { authenticateUser } from "../middlewares/authoriseUser.middleware.js";
+import { authorizeUser } from "../middlewares/authoriseUser.middleware.js";
 
 const securedRouter = express.Router();
 
-securedRouter.use(authenticateUser); //Protects all the routes with /s prefix
+securedRouter.use(authorizeUser); //Protects all the routes with /s prefix
 
 // Dashboard Routes
 securedRouter.route("/me").get(provideCreatorData);
