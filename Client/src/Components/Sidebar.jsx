@@ -8,8 +8,8 @@ export default function Sidebar() {
      const items = [
           ["Overview", "/me", TableOfContents],
           ["Templates", "/me/templates", LayoutPanelTop],
-          ["Tip page", "/tip/alexplays", Wallet],
           ["Supporters", "/me/supporters", Trophy],
+          ["Tip page", "/tip/alexplays", Wallet],
      ];
      return (
           <aside className="sidebar">

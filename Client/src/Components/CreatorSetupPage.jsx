@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "../css/creator-setup-page.css";
+import StatusToast from "./StatusToast";
+import validator from "validator";
 
 // To be added field
 // * Display name
@@ -69,49 +71,55 @@ const fields = [
                fieldType: "planetext",
                selectionOptions: [],
           },
-          type: "url",
      },
 ];
 
-const platforms = [
-     { key: "kick_platform", platform_name: "Kick", platform_logo_cdn: "https://cdn.simpleicons.org/twitch" },
-     { key: "youtube_platform", platform_name: "Kick", platform_logo_cdn: "https://cdn.simpleicons.org/youtube" },
-     { key: "kick_platform", platform_name: "Kick", platform_logo_cdn: "https://cdn.simpleicons.org/kick" },
-];
+// const platforms = [
+//      { key: "twitch_platform", platform_name: "Twitch", platform_logo_cdn: "https://cdn.simpleicons.org/twitch" },
+//      { key: "youtube_platform", platform_name: "Youtube", platform_logo_cdn: "https://cdn.simpleicons.org/youtube" },
+//      { key: "kick_platform", platform_name: "Kick", platform_logo_cdn: "https://cdn.simpleicons.org/kick" },
+// ];
 
 export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip, isSaving = false }) {
      const [profile, setProfile] = useState({
-          displayName: "",
-          username: "",
-          category: "",
-          company: "",
-          role: "",
-          linkedin: "",
-          twitter: "",
-          website: "",
-          affiliateCode: "",
-          ...initialValues,
+          email: "" || null,
+          username: "" || null,
+          displayName: "" || null,
+          gender: "" || null,
+          category: "" || null,
+          about: "" || null,
+          website: "" || null,
      });
      const [message, setMessage] = useState("");
      const [activeGenderBtn, setActiveGenderBtn] = useState("");
+     const [statusToastActive, setStatusToastActive] = useState(false);
+     const [statusCodeInfo, setStatusToastInfo] = useState({});
+     const [emailInvalid, setEmailInvalid] = useState(false);
 
-     const update = ({ target: { name, value } }) => {
+     const updateProfile = ({ target: { name, value } }) => {
           setProfile((current) => ({ ...current, [name]: value }));
-          setMessage("");
      };
 
      const submit = async (event) => {
           event.preventDefault();
-          try {
-               if (onSubmit) await onSubmit(profile);
-               else setMessage("UI preview only — connect onSubmit to your profile setup API to save these details.");
-          } catch (error) {
-               setMessage(
-                    error?.response?.data?.message ||
-                         error?.message ||
-                         "Could not save your details. Please try again.",
-               );
+          const { email, username, displayName, gender, category, about, website } = profile;
+          const arr = [email, username, displayName, gender, category, about, website];
+          if (arr.every((elem) => elem === null)) {
+               setStatusToastInfo({
+                    success: false,
+                    message: "Please fill out the fields to continue",
+               });
+               setStatusToastActive(true);
+               return;
           }
+
+          // Validation for inputs
+          const isEmail = validator.isEmail(email);
+          if (!isEmail) {
+               setEmailInvalid("Invalid email")
+               return;
+          }
+          
      };
 
      const field = (name, label, placeholder, fieldType, type = "text") => {
@@ -124,7 +132,7 @@ export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip,
                               name={name}
                               type={type}
                               value={profile[name] || ""}
-                              onChange={update}
+                              onChange={updateProfile}
                               placeholder={placeholder}
                          />
                     </div>
@@ -136,7 +144,6 @@ export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip,
                );
           }
      };
-
      return (
           <main className="st-setup-page">
                <header className="st-setup-topbar">
@@ -196,7 +203,7 @@ export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip,
                                    </div>
                               </div>
                          </div>
-                         <form className="st-setup-form" onSubmit={submit}>
+                         <div className="st-setup-form">
                               <div className="st-setup-two-col">
                                    {field("email", "Email", "e.g. example@email.com", "planetext")}
                                    {field("username", "Username", "Choose a unique username", "planetext")}
@@ -214,7 +221,7 @@ export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip,
                                                             name={name}
                                                             type={type || "text"}
                                                             value={profile[name] || ""}
-                                                            onChange={update}
+                                                            onChange={updateProfile}
                                                             placeholder={placeholder}
                                                        />
                                                   </div>
@@ -226,7 +233,15 @@ export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip,
                                                        <div className="st-setup-selection-btns">
                                                             {selectionOptions.map((option) => (
                                                                  <button
-                                                                      onClick={() => setActiveGenderBtn(option)}
+                                                                      onClick={(event) => {
+                                                                           setActiveGenderBtn(option);
+                                                                           updateProfile({
+                                                                                target: {
+                                                                                     name: "gender",
+                                                                                     value: option,
+                                                                                },
+                                                                           });
+                                                                      }}
                                                                       className={`st-setup-selection-btn ${
                                                                            activeGenderBtn === option ? option : ""
                                                                       }`}
@@ -239,16 +254,9 @@ export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip,
                                              );
                                         }
                                    })}
-                                   <div className="st-setup-platforms-container st-setup-row">
-                                        <label htmlFor="Platforms">Platforms</label>
-                                        <div className="st-setup-platform-options">
-                                             {platforms.map(({ key, platform_name, platform_logo_cdn }) => (
-                                                  <button key={key}><img src={platform_logo_cdn} alt={platform_name} />{" "}{platform_name}</button>
-                                             ))}
-                                        </div>
-                                   </div>
+                                   {}
                               </div>
-                              
+
                               {/* Create a pop up toast for status*/}
                               <footer className="st-setup-footer">
                                    <p>
@@ -260,14 +268,23 @@ export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip,
                                                   Do this later
                                              </button>
                                         )}
-                                        <button type="submit" className="st-setup-submit" disabled={isSaving}>
+                                        <button onClick={submit} className="st-setup-submit" disabled={isSaving}>
                                              {isSaving ? "Saving..." : "Save & continue"} {!isSaving && <b>&gt;</b>}
                                         </button>
                                    </div>
                               </footer>
-                         </form>
+                         </div>
                     </section>
                </div>
+               {statusToastActive && (
+                    <StatusToast
+                         success={statusCodeInfo.success}
+                         message={statusCodeInfo.message}
+                         onClose={() => {
+                              setStatusToastActive(false);
+                         }}
+                    ></StatusToast>
+               )}
           </main>
      );
 }

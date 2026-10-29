@@ -19,7 +19,8 @@ export default function Landing() {
                console.log(response)
                return response;
           },
-          refetchOnWindowFocus: false,
+          refetchOnReconnect: true,
+          refetchOnWindowFocus: true,
           retryDelay: 500,
           retry: 3,
      });
