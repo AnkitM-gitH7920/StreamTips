@@ -10,6 +10,20 @@ import "../css/creator-setup-page.css";
 // * Creator category
 // * Website URL
 // * Streaming platforms
+
+// {
+//      name: "gender",
+//      label: "Gender",
+//      placeholder: null,
+//      fieldOptionsObj: {
+//           fieldType: "selection",
+//           selectionOptions: [
+//                { option: "Male", onSelectColor: "cyan" },
+//                { option: "Female", onSelectColor: "pink" },
+//                { option: "Others", onSelectColor: "orange" },
+//           ],
+//      },
+// },
 const fields = [
      {
           name: "displayName",
@@ -18,6 +32,15 @@ const fields = [
           fieldOptionsObj: {
                fieldType: "planetext",
                selectionOptions: [],
+          },
+     },
+     {
+          name: "gender",
+          label: "Gender",
+          placeholder: null,
+          fieldOptionsObj: {
+               fieldType: "selection",
+               selectionOptions: ["Male", "Female", "Others"],
           },
      },
      {
@@ -50,6 +73,12 @@ const fields = [
      },
 ];
 
+const platforms = [
+     { key: "kick_platform", platform_name: "Kick", platform_logo_cdn: "https://cdn.simpleicons.org/twitch" },
+     { key: "youtube_platform", platform_name: "Kick", platform_logo_cdn: "https://cdn.simpleicons.org/youtube" },
+     { key: "kick_platform", platform_name: "Kick", platform_logo_cdn: "https://cdn.simpleicons.org/kick" },
+];
+
 export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip, isSaving = false }) {
      const [profile, setProfile] = useState({
           displayName: "",
@@ -63,8 +92,8 @@ export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip,
           affiliateCode: "",
           ...initialValues,
      });
-     const [activeTab, setActiveTab] = useState("creator");
      const [message, setMessage] = useState("");
+     const [activeGenderBtn, setActiveGenderBtn] = useState("");
 
      const update = ({ target: { name, value } }) => {
           setProfile((current) => ({ ...current, [name]: value }));
@@ -175,7 +204,6 @@ export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip,
                               <div className="st-setup-divider" />
                               <div className="st-setup-rows">
                                    {fields.map(({ name, label, placeholder, fieldOptionsObj, type }) => {
-                                        console.log(fieldOptionsObj);
                                         const { fieldType, selectionOptions } = fieldOptionsObj;
                                         if (fieldType === "planetext") {
                                              return (
@@ -192,44 +220,35 @@ export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip,
                                                   </div>
                                              );
                                         } else if (fieldType === "selection") {
-                                             return <div>Nothing</div>;
+                                             return (
+                                                  <div className="st-setup-row">
+                                                       <label htmlFor={name}>{label}</label>
+                                                       <div className="st-setup-selection-btns">
+                                                            {selectionOptions.map((option) => (
+                                                                 <button
+                                                                      onClick={() => setActiveGenderBtn(option)}
+                                                                      className={`st-setup-selection-btn ${
+                                                                           activeGenderBtn === option ? option : ""
+                                                                      }`}
+                                                                 >
+                                                                      {option}
+                                                                 </button>
+                                                            ))}
+                                                       </div>
+                                                  </div>
+                                             );
                                         }
                                    })}
+                                   <div className="st-setup-platforms-container st-setup-row">
+                                        <label htmlFor="Platforms">Platforms</label>
+                                        <div className="st-setup-platform-options">
+                                             {platforms.map(({ key, platform_name, platform_logo_cdn }) => (
+                                                  <button key={key}><img src={platform_logo_cdn} alt={platform_name} />{" "}{platform_name}</button>
+                                             ))}
+                                        </div>
+                                   </div>
                               </div>
-                              {/* <div className="st-setup-affiliate">
-                                             <span className="st-setup-spark">✦</span>
-                                             <div>
-                                                  <strong>Affiliate partner (optional)</strong>
-                                                  <p>
-                                                       Have a partner code? Add it here. If you were referred by a
-                                                       community, use the code they shared with you.
-                                                  </p>
-                                                  <input
-                                                       name="affiliateCode"
-                                                       value={profile.affiliateCode}
-                                                       onChange={update}
-                                                       placeholder="Enter partner code"
-                                                       aria-label="Affiliate partner code"
-                                                  />
-                                             </div>
-                                             <small>OPTIONAL</small>
-                                        </div>*/}
-
-                              {/* <div className="st-setup-placeholder">
-                                        <span>{activeTab === "personal" ? "✧" : "◇"}</span>*/}
-                              {/* <h2>
-                                             {activeTab === "personal" ? "Personal information" : "Login & security"}
-                                        </h2>*/}
-                              {/* <p>
-                                             {activeTab === "personal"
-                                                  ? "Add personal details in the next step. Your public creator profile only displays information you choose to share."
-                                                  : "Your sign-in method and security settings can be managed here. Authentication settings are not editable in this profile setup form."}
-                                        </p>
-                                        <button type="button" onClick={() => setActiveTab("creator")}>
-                                             Back to creator profile →
-                                        </button>
-                                   </div>*/}
-
+                              
                               {/* Create a pop up toast for status*/}
                               <footer className="st-setup-footer">
                                    <p>
