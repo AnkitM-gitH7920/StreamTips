@@ -4,6 +4,7 @@ import { Search } from "lucide-react";
 import DashboardShell from "./DashboardShell";
 import TemplateCard from "./TemplateCard";
 import { templates } from "./data";
+import { LayoutPanelTop } from "lucide-react";;
 
 export default function TemplatesPage() {
      const [filter, setFilter] = useState("All");

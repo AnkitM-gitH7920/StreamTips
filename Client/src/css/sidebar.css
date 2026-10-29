@@ -30,7 +30,7 @@
 .sidebar-bottom>a:hover {
      background: #eaf1ed;
      color: var(--ink);
-     font-weight: 700
+     scale: 1.05;
 }
 
 .sidebar-bottom {

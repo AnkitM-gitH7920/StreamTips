@@ -1,6 +1,6 @@
 import React from "react";
 import "../css/dashboard.css";
-import { ArrowRight, Crown, Eye, Sparkles, Trophy, Upload, Users, Zap } from "lucide-react";
+import { ArrowRight, Crown, Eye, DollarSign, Trophy, Upload, Users, WalletCards } from "lucide-react";
 import Button from "./Button";
 import DashboardShell from "./DashboardShell";
 import TemplatePreview from "./TemplatePreview";
@@ -18,8 +18,8 @@ export default function Dashboard() {
                     </div>
                     <div className="metric-grid">
                          {
-                              [["Total tips", "₹48,620", "+18.4%", Zap],
-                              ["This month", "₹12,850", "+24.8%", Sparkles],
+                              [["Total tips", "₹48,620", "+18.4%", WalletCards],
+                              ["This month", "₹12,850", "+24.8%", DollarSign],
                               ["Supporters", "184", "+12.2%", Users],
                               ["Top supporter", "Rohan", "₹12,500", Crown]].map(([a, b, c, I]) =>
                                    <div className="metric" key={a}>

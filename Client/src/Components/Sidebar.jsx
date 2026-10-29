@@ -1,14 +1,14 @@
 import React from "react";
 import "../css/sidebar.css";
-import { ChevronDown, LayoutDashboard, Settings, Sparkles, Trophy, Zap } from "lucide-react";
+import { ChevronDown, TableOfContents, Settings, LayoutPanelTop, Trophy, Wallet  } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import Logo from "./Logo";
 
 export default function Sidebar() {
      const items = [
-          ["Overview", "/me", LayoutDashboard],
-          ["Templates", "/me/templates", Sparkles],
-          ["Tip page", "/tip/alexplays", Zap],
+          ["Overview", "/me", TableOfContents],
+          ["Templates", "/me/templates", LayoutPanelTop],
+          ["Tip page", "/tip/alexplays", Wallet],
           ["Supporters", "/me/supporters", Trophy],
      ];
      return (

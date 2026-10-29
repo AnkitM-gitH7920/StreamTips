@@ -5,6 +5,7 @@ import "../css/creator-setup-page.css";
 // * Display name
 // * Username
 // * email
+// * Profile picture upload
 // * about
 // * Creator category
 // * Website URL
