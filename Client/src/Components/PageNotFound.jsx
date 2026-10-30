@@ -1,61 +1,48 @@
 import "../css/page-not-found.css";
 import React from "react";
+import { useNavigate, Link } from "react-router-dom";
 
 export default function PageNotFound() {
      const navigate = useNavigate();
-     
-          return (
-               <main className="st-not-found">
-                    <div className="st-404-glow" />
-     
-                    <div className="st-404-content">
-                         <Link to="/" className="st-404-brand">
-                              <span className="st-404-brand-icon">S</span>
-                              StreamTips
-                         </Link>
-     
-                         <div className="st-404-illustration">
-                              <span>4</span>
-                              <div className="st-404-zero">
-                                   <div className="st-404-zero-inner" />
-                              </div>
-                              <span>4</span>
+
+     return (
+          <main className="st-not-found">
+               <div className="st-not-found-container">
+                    <Link to="/" className="st-not-found-brand">
+                         <span className="st-not-found-logo">S</span>
+                         <span>StreamTips</span>
+                    </Link>
+
+                    <div className="st-not-found-content">
+                         <div className="st-not-found-code">
+                              404<span>.</span>
                          </div>
-     
-                         <div className="st-404-message">
-                              <span className="st-404-eyebrow">
-                                   PAGE NOT FOUND
-                              </span>
-     
-                              <h1>
-                                   Looks like you're <span>lost.</span>
-                              </h1>
-     
-                              <p>
-                                   The page you're looking for doesn't exist,
-                                   has been moved, or the link might be broken.
-                              </p>
-                         </div>
-     
-                         <div className="st-404-actions">
-                              <Link to="/" className="st-404-home-btn">
-                                   <span>Back to Home</span>
+
+                         <span className="st-not-found-label">PAGE NOT FOUND</span>
+
+                         <h1>
+                              Well, this is <span>awkward.</span>
+                         </h1>
+
+                         <p>The page you're looking for doesn't exist or may have been moved somewhere else.</p>
+
+                         <div className="st-not-found-actions">
+                              <Link to="/" className="st-not-found-primary">
+                                   Back to home
                                    <span>↗</span>
                               </Link>
-     
-                              <button
-                                   type="button"
-                                   className="st-404-back-btn"
-                                   onClick={() => navigate(-1)}
-                              >
+
+                              <button type="button" className="st-not-found-secondary" onClick={() => navigate(-1)}>
                                    Go back
                               </button>
                          </div>
-     
-                         <span className="st-404-footer">
-                              © {new Date().getFullYear()} StreamTips. All rights reserved.
-                         </span>
                     </div>
-               </main>
-          );
+
+                    <footer className="st-not-found-footer">
+                         <span>© {new Date().getFullYear()} StreamTips</span>
+                         <span>Made for creators.</span>
+                    </footer>
+               </div>
+          </main>
+     );
 }
