@@ -82,6 +82,7 @@ const fields = [
 
 export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip, isSaving = false }) {
      const [profile, setProfile] = useState({
+          profilePic: "" || null,
           email: "" || null,
           username: "" || null,
           displayName: "" || null,
@@ -91,10 +92,16 @@ export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip,
           website: "" || null,
      });
      const [message, setMessage] = useState("");
+     const [profileSetupCurrentStep, setProfileSetupCurrentStep] = useState(
+          () => Number.parseInt(localStorage.getItem("st_profile-setup_step")) || 1,
+     );
      const [activeGenderBtn, setActiveGenderBtn] = useState("");
      const [statusToastActive, setStatusToastActive] = useState(false);
      const [statusCodeInfo, setStatusToastInfo] = useState({});
      const [emailInvalid, setEmailInvalid] = useState(false);
+     const [userSavedInfo, setUserSavedInfo] = useState(
+          () => JSON.parse(localStorage.getItem("user_saved_info")) || {},
+     );
 
      const updateProfile = ({ target: { name, value } }) => {
           setProfile((current) => ({ ...current, [name]: value }));
@@ -102,7 +109,7 @@ export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip,
 
      const submit = async (event) => {
           event.preventDefault();
-          const { email, username, displayName, gender, category, about, website } = profile;
+          const { profilePic, email, username, displayName, gender, category, about, website } = profile;
           const arr = [email, username, displayName, gender, category, about, website];
           if (arr.every((elem) => elem === null)) {
                setStatusToastInfo({
@@ -116,10 +123,73 @@ export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip,
           // Validation for inputs
           const isEmail = validator.isEmail(email);
           if (!isEmail) {
-               setEmailInvalid("Invalid email")
+               setEmailInvalid("Invalid email");
                return;
           }
-          
+
+          const isUsernameValid = /^[a-zA-Z0-9_]{3,20}$/.test(username || "");
+          if (!isUsernameValid) {
+               setStatusToastInfo({
+                    success: false,
+                    message: "Username must be 3–20 characters and contain only letters, numbers, or underscores",
+               });
+               setStatusToastActive(true);
+               return;
+          }
+
+          const isDisplayNameValid = Boolean(displayName?.trim()) && displayName.trim().length <= 50;
+          if (!isDisplayNameValid) {
+               setStatusToastInfo({
+                    success: false,
+                    message: "Display name is required and must be 50 characters or fewer",
+               });
+               setStatusToastActive(true);
+               return;
+          }
+
+          const isGenderValid = ["Male", "Female", "Others"].includes(gender);
+          if (!isGenderValid) {
+               setStatusToastInfo({ success: false, message: "Please select a gender" });
+               setStatusToastActive(true);
+               return;
+          }
+
+          const isCategoryValid = Boolean(category?.trim()) && category.trim().length <= 60;
+          if (!isCategoryValid) {
+               setStatusToastInfo({
+                    success: false,
+                    message: "Creator category is required and must be 60 characters or fewer",
+               });
+               setStatusToastActive(true);
+               return;
+          }
+
+          const isWebsiteValid = !website?.trim() || validator.isURL(website.trim(), { require_protocol: true });
+          if (!isWebsiteValid) {
+               setStatusToastInfo({ success: false, message: "Please enter a valid website URL including https://" });
+               setStatusToastActive(true);
+               return;
+          }
+
+          const LSData = {
+               profilePic,
+               email,
+               username,
+               displayName,
+               gender,
+               category,
+               about,
+               website,
+          };
+          localStorage.setItem("user_saved_info", JSON.stringify(LSData));
+          localStorage.setItem("st_profile-setup_step", 2);
+          setProfileSetupCurrentStep(2);
+          setStatusToastInfo({
+               success: true,
+               message: "Your information has been saved",
+          });
+          setStatusToastActive(true);
+          console.log("Saved infomation: progress=2");
      };
 
      const field = (name, label, placeholder, fieldType, type = "text") => {
@@ -144,6 +214,26 @@ export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip,
                );
           }
      };
+
+     // useEffects
+     useEffect(() => {
+          const keys = Object.values(userSavedInfo);
+          if (!keys.length) {
+               setProfileSetupCurrentStep(1);
+               return;
+          }
+
+          for (const [key, value] of Object.entries(userSavedInfo)) {
+               if (value === null) return;
+               if (key === "gender") setActiveGenderBtn(value);
+               updateProfile({
+                    target: {
+                         name: key,
+                         value: value,
+                    },
+               });
+          }
+     }, [userSavedInfo]);
      return (
           <main className="st-setup-page">
                <header className="st-setup-topbar">
@@ -162,18 +252,18 @@ export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip,
                     <aside className="st-setup-sidebar">
                          <div className="st-setup-user">
                               <span className="st-setup-user-avatar">
-                                   {profile.displayName?.trim()?.[0]?.toUpperCase() || "C"}
+                                   {profile.profilePic?.length ? (
+                                        <img height={25} width={25} src="" alt="Loading..." />
+                                   ) : (
+                                        profile.displayName?.trim()?.[0]?.toUpperCase() || "C"
+                                   )}
+                                   {/* <button className="st-setup-edit-avatar"></button>*/}
                               </span>
                               <div>
                                    <strong>{profile.displayName || "Your creator profile"}</strong>
                                    <small>{profile.username ? `@${profile.username}` : "Almost ready to go"}</small>
                               </div>
                          </div>
-                         <nav className="st-setup-nav" aria-label="Setup navigation">
-                              <div className="st-setup-pfp">
-                                   <img src="" alt="" />
-                              </div>
-                         </nav>
                          <div className="st-setup-help">
                               <span>?</span>
                               <div>
@@ -187,19 +277,26 @@ export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip,
                          <div className="st-setup-heading">
                               <div>
                                    <p className="st-setup-eyebrow">LET'S GET YOU STARTED</p>
-                                   <h1>Set up your profile</h1>
+                                   <h1>
+                                        {profileSetupCurrentStep === 1
+                                             ? "Set up your profile"
+                                             : "Connect your bank account"}
+                                   </h1>
                                    <p className="st-setup-subtitle">
-                                        Give your supporters a little context about you. You can update these details
-                                        anytime.
+                                        Link your bank account to start receiving tips when you go live.
                                    </p>
                               </div>
                               <div className="st-setup-progress">
                                    <small>PROFILE SETUP</small>
                                    <strong>
-                                        Step 1 <em>of</em> 2
+                                        Step {profileSetupCurrentStep} <em>of</em> 2
                                    </strong>
                                    <div>
-                                        <span />
+                                        <span
+                                             style={{
+                                                  width: profileSetupCurrentStep === 1 ? "50%" : "100%",
+                                             }}
+                                        />
                                    </div>
                               </div>
                          </div>
