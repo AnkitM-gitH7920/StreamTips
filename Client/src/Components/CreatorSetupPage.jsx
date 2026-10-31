@@ -93,7 +93,7 @@ export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip,
      });
      const [message, setMessage] = useState("");
      const [profileSetupCurrentStep, setProfileSetupCurrentStep] = useState(
-          () => Number.parseInt(localStorage.getItem("st_profile-setup_step")) || 1,
+          () => Number.parseInt(localStorage.getItem("st_profile_setup_step")) || 1,
      );
      const [activeGenderBtn, setActiveGenderBtn] = useState("");
      const [statusToastActive, setStatusToastActive] = useState(false);
@@ -182,7 +182,7 @@ export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip,
                website,
           };
           localStorage.setItem("user_saved_info", JSON.stringify(LSData));
-          localStorage.setItem("st_profile-setup_step", 2);
+          localStorage.setItem("st_profile_setup_step", 2);
           setProfileSetupCurrentStep(2);
           setStatusToastInfo({
                success: true,
@@ -217,14 +217,14 @@ export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip,
 
      // useEffects
      useEffect(() => {
-          const keys = Object.values(userSavedInfo);
-          if (!keys.length) {
+          const values = Object.values(userSavedInfo);
+          console.log(values);
+          if (!values.length) {
                setProfileSetupCurrentStep(1);
                return;
           }
 
           for (const [key, value] of Object.entries(userSavedInfo)) {
-               if (value === null) return;
                if (key === "gender") setActiveGenderBtn(value);
                updateProfile({
                     target: {
@@ -251,17 +251,62 @@ export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip,
                <div className="st-setup-layout">
                     <aside className="st-setup-sidebar">
                          <div className="st-setup-user">
-                              <span className="st-setup-user-avatar">
-                                   {profile.profilePic?.length ? (
-                                        <img height={25} width={25} src="" alt="Loading..." />
-                                   ) : (
-                                        profile.displayName?.trim()?.[0]?.toUpperCase() || "C"
-                                   )}
-                                   {/* <button className="st-setup-edit-avatar"></button>*/}
-                              </span>
-                              <div>
-                                   <strong>{profile.displayName || "Your creator profile"}</strong>
-                                   <small>{profile.username ? `@${profile.username}` : "Almost ready to go"}</small>
+                              <div className="st-setup-avatar-wrapper">
+                                   <span className="st-setup-user-avatar">
+                                        {profile.profilePic ? (
+                                             <img src={profile.profilePic} alt="Profile" />
+                                        ) : (
+                                             profile.displayName?.trim()?.[0]?.toUpperCase() || "C"
+                                        )}
+                                   </span>
+
+                                   <label
+                                        htmlFor="profile-pic-upload"
+                                        className="st-setup-edit-avatar"
+                                        title="Change profile picture"
+                                   >
+                                        <span>✎</span>
+                                   </label>
+
+                                   <input
+                                        type="file"
+                                        id="profile-pic-upload"
+                                        accept="image/*"
+                                        hidden
+                                        onChange={(e) => {
+                                             const file = e.target.files?.[0];
+                                             console.log(e.target)
+                                             if (file) {
+                                                  setProfile((current) => ({
+                                                       ...current,
+                                                       profilePic: URL.createObjectURL(file),
+                                                  }));
+                                             }
+                                        }}
+                                   />
+                              </div>
+                              <div className="st-setup-sidebar-user-info">
+                                   <strong>{profile.displayName?.trim() || "Your name here"}</strong>
+
+                                   <span className="st-setup-user-pronouns">
+                                        {profile.gender === "Male"
+                                             ? "he/him"
+                                             : profile.gender === "Female"
+                                               ? "she/her"
+                                               : profile.gender === "Others"
+                                                 ? "they/them"
+                                                 : "your pronouns"}
+                                   </span>
+
+                                   <small>@{profile.username || "yourusername"}</small>
+                              </div>
+                              <div className="st-setup-sidebar-about">
+                                   <span className="st-setup-about-label">ABOUT</span>
+
+                                   <p>
+                                        {profile.about?.trim() ||
+                                             "Your story starts here. Tell your supporters a little about yourself."}
+                                   </p>
                               </div>
                          </div>
                          <div className="st-setup-help">
@@ -283,7 +328,9 @@ export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip,
                                              : "Connect your bank account"}
                                    </h1>
                                    <p className="st-setup-subtitle">
-                                        Link your bank account to start receiving tips when you go live.
+                                        {profileSetupCurrentStep === 1
+                                             ? "Let us know you"
+                                             : "Link your bank account to start receiving tips when you go live."}
                                    </p>
                               </div>
                               <div className="st-setup-progress">
@@ -300,77 +347,234 @@ export default function CreatorSetupPage({ initialValues = {}, onSubmit, onSkip,
                                    </div>
                               </div>
                          </div>
-                         <div className="st-setup-form">
-                              <div className="st-setup-two-col">
-                                   {field("email", "Email", "e.g. example@email.com", "planetext")}
-                                   {field("username", "Username", "Choose a unique username", "planetext")}
-                              </div>
-                              <div className="st-setup-divider" />
-                              <div className="st-setup-rows">
-                                   {fields.map(({ name, label, placeholder, fieldOptionsObj, type }) => {
-                                        const { fieldType, selectionOptions } = fieldOptionsObj;
-                                        if (fieldType === "planetext") {
-                                             return (
-                                                  <div className="st-setup-row" key={name}>
-                                                       <label htmlFor={name}>{label}</label>
-                                                       <input
-                                                            id={name}
-                                                            name={name}
-                                                            type={type || "text"}
-                                                            value={profile[name] || ""}
-                                                            onChange={updateProfile}
-                                                            placeholder={placeholder}
-                                                       />
-                                                  </div>
-                                             );
-                                        } else if (fieldType === "selection") {
-                                             return (
-                                                  <div className="st-setup-row">
-                                                       <label htmlFor={name}>{label}</label>
-                                                       <div className="st-setup-selection-btns">
-                                                            {selectionOptions.map((option) => (
-                                                                 <button
-                                                                      onClick={(event) => {
-                                                                           setActiveGenderBtn(option);
-                                                                           updateProfile({
-                                                                                target: {
-                                                                                     name: "gender",
-                                                                                     value: option,
-                                                                                },
-                                                                           });
-                                                                      }}
-                                                                      className={`st-setup-selection-btn ${
-                                                                           activeGenderBtn === option ? option : ""
-                                                                      }`}
-                                                                 >
-                                                                      {option}
-                                                                 </button>
-                                                            ))}
-                                                       </div>
-                                                  </div>
-                                             );
-                                        }
-                                   })}
-                                   {}
-                              </div>
-
-                              {/* Create a pop up toast for status*/}
-                              <footer className="st-setup-footer">
-                                   <p>
-                                        <span>♧</span> Your information is protected and kept secure.
-                                   </p>
-                                   <div>
-                                        {onSkip && (
-                                             <button type="button" className="st-setup-skip" onClick={onSkip}>
-                                                  Do this later
-                                             </button>
-                                        )}
-                                        <button onClick={submit} className="st-setup-submit" disabled={isSaving}>
-                                             {isSaving ? "Saving..." : "Save & continue"} {!isSaving && <b>&gt;</b>}
-                                        </button>
+                         {profileSetupCurrentStep === 1 ? (
+                              <div className="st-setup-form">
+                                   <div className="st-setup-two-col">
+                                        {field("email", "Email", "e.g. example@email.com", "planetext")}
+                                        {field("username", "Username", "Choose a unique username", "planetext")}
                                    </div>
-                              </footer>
-                         </div>
+                                   <div className="st-setup-divider" />
+                                   <div className="st-setup-rows">
+                                        {fields.map(({ name, label, placeholder, fieldOptionsObj, type }) => {
+                                             const { fieldType, selectionOptions } = fieldOptionsObj;
+                                             if (fieldType === "planetext") {
+                                                  return (
+                                                       <div className="st-setup-row" key={name}>
+                                                            <label htmlFor={name}>{label}</label>
+                                                            <input
+                                                                 id={name}
+                                                                 name={name}
+                                                                 type={type || "text"}
+                                                                 value={profile[name] || ""}
+                                                                 onChange={updateProfile}
+                                                                 placeholder={placeholder}
+                                                            />
+                                                       </div>
+                                                  );
+                                             } else if (fieldType === "selection") {
+                                                  return (
+                                                       <div className="st-setup-row">
+                                                            <label htmlFor={name}>{label}</label>
+                                                            <div className="st-setup-selection-btns">
+                                                                 {selectionOptions.map((option) => (
+                                                                      <button
+                                                                           onClick={(event) => {
+                                                                                setActiveGenderBtn(option);
+                                                                                updateProfile({
+                                                                                     target: {
+                                                                                          name: "gender",
+                                                                                          value: option,
+                                                                                     },
+                                                                                });
+                                                                           }}
+                                                                           className={`st-setup-selection-btn ${
+                                                                                activeGenderBtn === option ? option : ""
+                                                                           }`}
+                                                                      >
+                                                                           {option}
+                                                                      </button>
+                                                                 ))}
+                                                            </div>
+                                                       </div>
+                                                  );
+                                             }
+                                        })}
+                                   </div>
+
+                                   {/* Create a pop up toast for status*/}
+                                   <footer className="st-setup-footer">
+                                        <p>
+                                             <span>♧</span> Your information is protected and kept secure.
+                                        </p>
+                                        <div>
+                                             {onSkip && (
+                                                  <button type="button" className="st-setup-skip" onClick={onSkip}>
+                                                       Do this later
+                                                  </button>
+                                             )}
+                                             <button onClick={submit} className="st-setup-submit" disabled={isSaving}>
+                                                  {isSaving ? "Saving..." : "Save & continue"}{" "}
+                                                  {!isSaving && <b>&gt;</b>}
+                                             </button>
+                                        </div>
+                                   </footer>
+                              </div>
+                         ) : (
+                                   // Need to built every component separatly
+                                   <div className="st-setup-form st-setup-payout-form">
+                                        {/* Account holder */}
+                                        <div className="st-setup-row">
+                                             <label htmlFor="accountHolderName">
+                                                  Account holder name
+                                             </label>
+                                             <input
+                                                  id="accountHolderName"
+                                                  name="accountHolderName"
+                                                  type="text"
+                                                  value={profile.accountHolderName || ""}
+                                                  onChange={updateProfile}
+                                                  placeholder="Name as registered with your bank"
+                                             />
+                                        </div>
+                                   
+                                        {/* Account number */}
+                                        <div className="st-setup-two-col">
+                                             <div className="st-setup-row">
+                                                  <label htmlFor="accountNumber">
+                                                       Account number
+                                                  </label>
+                                                  <input
+                                                       id="accountNumber"
+                                                       name="accountNumber"
+                                                       type="password"
+                                                       value={profile.accountNumber || ""}
+                                                       onChange={updateProfile}
+                                                       placeholder="Enter account number"
+                                                  />
+                                             </div>
+                                   
+                                             <div className="st-setup-row">
+                                                  <label htmlFor="confirmAccountNumber">
+                                                       Confirm account number
+                                                  </label>
+                                                  <input
+                                                       id="confirmAccountNumber"
+                                                       name="confirmAccountNumber"
+                                                       type="password"
+                                                       value={profile.confirmAccountNumber || ""}
+                                                       onChange={updateProfile}
+                                                       placeholder="Re-enter account number"
+                                                  />
+                                             </div>
+                                        </div>
+                                   
+                                        {/* Bank details */}
+                                        <div className="st-setup-two-col">
+                                             <div className="st-setup-row">
+                                                  <label htmlFor="ifscCode">IFSC code</label>
+                                                  <input
+                                                       id="ifscCode"
+                                                       name="ifscCode"
+                                                       type="text"
+                                                       value={profile.ifscCode || ""}
+                                                       onChange={updateProfile}
+                                                       placeholder="e.g. SBIN0001234"
+                                                  />
+                                             </div>
+                                   
+                                             <div className="st-setup-row">
+                                                  <label htmlFor="bankName">Bank name</label>
+                                                  <input
+                                                       id="bankName"
+                                                       name="bankName"
+                                                       type="text"
+                                                       value={profile.bankName || ""}
+                                                       onChange={updateProfile}
+                                                       placeholder="Enter bank name"
+                                                  />
+                                             </div>
+                                        </div>
+                                   
+                                        {/* Account type */}
+                                        <div className="st-setup-row">
+                                             <label htmlFor="accountType">Account type</label>
+                                             <select
+                                                  id="accountType"
+                                                  name="accountType"
+                                                  value={profile.accountType || ""}
+                                                  onChange={updateProfile}
+                                             >
+                                                  <option value="" disabled>Select account type</option>
+                                                  <option value="savings">Savings</option>
+                                                  <option value="current">Current</option>
+                                             </select>
+                                        </div>
+                                   
+                                        {/* Verification */}
+                                        <div className="st-setup-account-verify">
+                                             <div>
+                                                  <strong>Verify bank account</strong>
+                                                  <small>
+                                                       Verify that your bank account details are correct
+                                                       before uploading.
+                                                  </small>
+                                             </div>
+                                   
+                                             <button type="button" className="st-setup-verify-btn">
+                                                  Verify account
+                                             </button>
+                                        </div>
+                                   
+                                        <div className="st-setup-divider" />
+                                   
+                                        {/* Optional UPI */}
+                                        <div className="st-setup-payout-heading st-setup-upi-heading">
+                                             <div>
+                                                  <span className="st-setup-section-label">
+                                                       OPTIONAL
+                                                  </span>
+                                                  <h3>UPI details</h3>
+                                                  <p>
+                                                       You can also add a UPI ID if you want to receive
+                                                       payments through UPI.
+                                                  </p>
+                                             </div>
+                                        </div>
+                                   
+                                        <div className="st-setup-row">
+                                             <label htmlFor="upiId">UPI ID</label>
+                                             <input
+                                                  id="upiId"
+                                                  name="upiId"
+                                                  type="text"
+                                                  value={profile.upiId || ""}
+                                                  onChange={updateProfile}
+                                                  placeholder="yourname@upi"
+                                             />
+                                        </div>
+                                   
+                                        {/* Footer */}
+                                        <footer className="st-setup-footer">
+                                             <p>
+                                                  <span>♧</span>
+                                                  Your payment information is kept secure.
+                                             </p>
+                                   
+                                             <div>
+                                                  <button
+                                                       type="button"
+                                                       onClick={submit}
+                                                       className="st-setup-submit"
+                                                       disabled={isSaving}
+                                                  >
+                                                       {isSaving ? "Uploading..." : "Upload"}
+                                                       {!isSaving && <b>&gt;</b>}
+                                                  </button>
+                                             </div>
+                                        </footer>
+                                   
+                                   </div>
+                         )}
                     </section>
                </div>
                {statusToastActive && (
